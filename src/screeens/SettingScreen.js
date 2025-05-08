@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Text, View, Button, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 import Icon from 'react-native-vector-icons/Ionicons'; // Ensure you have react-native-vector-icons installed
 
@@ -18,17 +18,17 @@ const SettingsScreen = ({navigation}) => {
             {user && <Text style={styles.welcomeText}>Welcome, {user.username}!</Text>}
 
             {/* Buttons */}
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}onPress={()=>navigation.navigate('Profile')}>Profile Settings</Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Profile')}>
+                <Text style={styles.buttonText}>Profile Settings</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText} onPress={()=>navigation.navigate('Notifictions')} >Notifications</Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Notification')}>
+                <Text style={styles.buttonText}>Notifications</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText} onPress={()=>navigation.navigate('Privacyandsecurity')}>Privacy & Security</Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('privacyAndSecurity')}>
+                <Text style={styles.buttonText}>Privacy & Security</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText} onPress={()=>navigation.navigate('Helpandsupport')}>Help & Support</Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HelpAndSupport')}>
+                <Text style={styles.buttonText}>Help & Support</Text>
             </TouchableOpacity>
 
             {/* Logout Button */}

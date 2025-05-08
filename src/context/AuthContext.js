@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { login as loginUser } from '../services/authService'; // Import the login function
+import { loginUser as loginUser } from '../services/authService'; // Import the login function
 import { getUserDetails } from '../services/userService'; // Import the service to fetch user details
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,17 +14,22 @@ export const AuthProvider = ({ children }) => {
     // Function to login the user
     const login = async (username, password) => {
         try {
-            const data = await loginUser(username, password); // Call login from authService
-            if (data) {
-                setUserToken(data.key); // Set the access token
-                await AsyncStorage.setItem('accessToken', data.key); // Store access token in AsyncStorage
-            }
+          const data = await loginUser(username, password); // Call login from authService
+      
+          if (data && typeof data.key === 'string') {
+            console.log('✅ Received token:', data.key);
+            setUserToken(data.key); // Set the access token
+            await AsyncStorage.setItem('accessToken', data.key); // Store access token
+          } else {
+            console.error('❌ Invalid login response:', data);
+            throw new Error('Login failed: Invalid token format.');
+          }
         } catch (error) {
-            console.error('Login error:', error);
-            throw new Error('Login failed. Please check your credentials.');
+          console.error('Login error:', error);
+          throw new Error('Login failed. Please check your credentials.');
         }
-    };
-
+      };
+      
     // Function to logout the user
     const logout = async () => {
         await AsyncStorage.removeItem('accessToken'); // Remove access token from AsyncStorage

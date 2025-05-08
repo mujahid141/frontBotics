@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Alert, Button } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { AuthContext } from "../context/AuthContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FarmIdentification = () => {
   const { user } = useContext(AuthContext);
@@ -10,7 +11,9 @@ const FarmIdentification = () => {
   const [startPoint, setStartPoint] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [boundingBox, setBoundingBox] = useState([]);
-  const [mapRegion, setMapRegion] = useState(null); // Keeps the map region static
+  const [mapRegion, setMapRegion] = useState(null);
+
+  
 
   useEffect(() => {
     const getLocationPermission = async () => {
@@ -31,9 +34,21 @@ const FarmIdentification = () => {
     };
 
     getLocationPermission();
+    loadCoordinates();
   }, []);
 
-  // Handle map press to set the starting point
+  const loadCoordinates = async () => {
+    try {
+      const storedCoordinates = await AsyncStorage.getItem("selectedCoordinates");
+      if (storedCoordinates) {
+        const parsedCoordinates = JSON.parse(storedCoordinates);
+        setBoundingBox(parsedCoordinates);
+      }
+    } catch (error) {
+      console.error("Error loading coordinates:", error);
+    }
+  };
+
   const handleMapPress = (event) => {
     if (!dragging) {
       const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -42,7 +57,6 @@ const FarmIdentification = () => {
     }
   };
 
-  // Handle drag event to update the bounding box dynamically
   const handlePanDrag = (event) => {
     if (startPoint) {
       setDragging(true);
@@ -57,7 +71,6 @@ const FarmIdentification = () => {
     }
   };
 
-  // Finalize selection on touch release
   const handleDragEnd = () => {
     if (boundingBox.length > 0) {
       setDragging(false);
@@ -65,17 +78,24 @@ const FarmIdentification = () => {
     }
   };
 
-  // Reset the selection
   const resetSelection = () => {
     setStartPoint(null);
     setBoundingBox([]);
     setDragging(false);
   };
 
-  // Prevent map gestures during selection
   const handleRegionChange = (region) => {
     if (!dragging) {
-      setMapRegion(region); // Update region only when not selecting
+      setMapRegion(region);
+    }
+  };
+
+  const saveCoordinates = async () => {
+    try {
+      await AsyncStorage.setItem("selectedCoordinates", JSON.stringify(boundingBox));
+      Alert.alert("Area Confirmed", "Your selected area has been saved.");
+    } catch (error) {
+      console.error("Error saving coordinates:", error);
     }
   };
 
@@ -89,16 +109,16 @@ const FarmIdentification = () => {
           <MapView
             style={styles.map}
             initialRegion={userLocation}
-            region={mapRegion} // Keep map static during selection
+            region={mapRegion}
             onRegionChangeComplete={handleRegionChange}
             showsUserLocation={true}
-            onPress={handleMapPress} // Start selection
-            onPanDrag={handlePanDrag} // Drag to update selection
-            onTouchEnd={handleDragEnd} // Finalize selection
-            scrollEnabled={!dragging} // Disable scroll during selection
-            zoomEnabled={!dragging} // Disable zoom during selection
+            onPress={handleMapPress}
+            onPanDrag={handlePanDrag}
+            onTouchEnd={handleDragEnd}
+            scrollEnabled={!dragging}
+            zoomEnabled={!dragging}
+            mapType="satellite"
           >
-            {/* Display dynamic bounding box */}
             {boundingBox.length > 0 && (
               <Polygon
                 coordinates={boundingBox}
@@ -111,7 +131,7 @@ const FarmIdentification = () => {
           </MapView>
           <View style={styles.controls}>
             <Button title="Reset Selection" onPress={resetSelection} color="#FF6347" />
-            {boundingBox.length > 0 && <Button title="Confirm Selection" onPress={() => Alert.alert("Area Selected!")} />}
+            {boundingBox.length > 0 && <Button title="Confirm Selection" onPress={saveCoordinates} />}
           </View>
         </>
       ) : (

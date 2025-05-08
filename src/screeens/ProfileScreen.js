@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { AuthContext } from '../context/AuthContext'; 
-import { BASE_URL } from '../config/apiConfig';
+import { BASE_URL } from '../utils/sharesUtils';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const ProfileEditScreen = () => {
-  const { user } = useContext(AuthContext); // Retrieve token and userId from context
+  const { user } = useContext(AuthContext);
   const [userDetails, setUserDetails] = useState(user);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
   const [address, setAddress] = useState('');
-  const [isEditing, setIsEditing] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (user.id) {
@@ -47,8 +47,8 @@ const ProfileEditScreen = () => {
 
       if (response.ok) {
         Alert.alert('Success', 'Profile updated successfully!');
-        setIsEditing(false); 
-        fetchUserDetails(); 
+        setIsEditing(false);
+        fetchUserDetails();
       } else {
         Alert.alert('Error', 'Unable to update profile.');
       }
@@ -59,21 +59,27 @@ const ProfileEditScreen = () => {
   };
 
   const handleEditToggle = () => {
-    setIsEditing(!isEditing); 
+    setIsEditing(!isEditing);
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <View style={styles.profileHeader}>
        
-        <Text style={styles.username}>{userDetails.username}</Text>
-        <TouchableOpacity onPress={handleEditToggle}>
-          <MaterialIcons name={isEditing ? 'check' : 'edit'} size={30} color="#fff" style={styles.editIcon} />
+        <TouchableOpacity onPress={handleEditToggle} style={styles.editIconContainer}>
+          <MaterialIcons name={isEditing ? 'check' : 'edit'} size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {isEditing ? (
         <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor="#aaa"
+          />
           <TextInput
             style={styles.input}
             placeholder="Bio"
@@ -96,7 +102,7 @@ const ProfileEditScreen = () => {
             placeholderTextColor="#aaa"
           />
           <TouchableOpacity onPress={handleSaveProfile} style={styles.button}>
-            <Text style={styles.buttonText}>Save</Text>
+            <Text style={styles.buttonText}>Save Profile</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -123,69 +129,57 @@ const ProfileEditScreen = () => {
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
-    padding: 20,
+    backgroundColor: '#f0f4f7',
+    paddingHorizontal: 16,
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: 30,
-    position: 'relative',
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 15,
-    borderWidth: 3,
-    borderColor: '#007BFF',
+    justifyContent: 'center',
+    marginVertical: 20,
   },
   username: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 10,
   },
-  editIcon: {
-    position: 'absolute',
-    right: -12,
-    top: -40,
+  editIconContainer: {
     backgroundColor: '#007BFF',
-    padding: 12,
-    
+    padding: 10,
     borderRadius: 20,
   },
   formContainer: {
     backgroundColor: '#fff',
-    padding: 25,
-    borderRadius: 15,
-    elevation: 4,
+    padding: 20,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 4,
+    elevation: 2,
   },
   input: {
-    height: 45,
+    height: 50,
     borderColor: '#007BFF',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 15,
     paddingLeft: 15,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
   },
   button: {
     backgroundColor: '#007BFF',
-    padding: 15,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
   },
   buttonText: {
     color: '#fff',
@@ -194,26 +188,26 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     backgroundColor: '#fff',
-    padding: 25,
-    borderRadius: 15,
-    elevation: 4,
+    padding: 20,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 4,
+    elevation: 2,
   },
   detailItem: {
-    marginBottom: 18,
+    marginBottom: 15,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#444',
-    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#555',
   },
   info: {
     fontSize: 16,
-    color: '#555',
+    color: '#333',
+    marginTop: 5,
   },
 });
 

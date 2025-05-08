@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext";
@@ -16,73 +17,107 @@ import { BASE_URL } from "../utils/sharesUtils";
 
 const ChatBox = () => {
   const route = useRoute();
-  const { roomId } = route.params; // Get roomId from route params
+  const { roomId } = route.params;
+  const { user } = useContext(AuthContext);
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const { user } = useContext(AuthContext);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const flatListRef = useRef();
 
   const getMessages = async () => {
     try {
       const response = await axios.get(`${BASE_URL}community/rooms/${roomId}/messages/`);
-      setMessages(response.data);
+      const sorted = response.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      setMessages(sorted);
       setLoading(false);
+      setRefreshing(false);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Fetch messages error:", error);
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const sendMessage = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-  
-    if (!newMessage.trim()) return; // Ensure the message isn't empty
-  
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
     try {
       await axios.post(`${BASE_URL}community/rooms/${roomId}/messages/`, {
-        sender: user.id, // Use "sender" as expected by the backend
+        sender: user.pk,
         content: newMessage,
       });
-  
-      setNewMessage(""); // Clear the input field
-      getMessages(); // Refresh the messages by fetching the latest ones
+      setNewMessage("");
+      getMessages();
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Send message error:", error);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getMessages();
   };
 
   useEffect(() => {
     getMessages();
   }, [roomId]);
 
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
+  const isCurrentUser = (sender) => {
+    return sender === user?.username || sender === user?.pk;
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
+  };
+
+  const renderItem = ({ item }) => {
+    const isUser = isCurrentUser(item.sender);
+    const senderName = isUser ? "You" : "Botanic";
+
+    return (
+      <View
+        style={[
+          styles.messageBubble,
+          isUser ? styles.userBubble : styles.botBubble,
+        ]}
+      >
+        <Text style={styles.senderName}>{}</Text>
+        <Text style={styles.messageText}>{item.sender}</Text>
+        <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
+      </View>
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <Text style={styles.header}>Chat</Text>
-      {user && <Text style={styles.welcome}>Welcome, {user.username}!</Text>}
-      {loading ? (
-        <Text>Loading messages...</Text>
-      ) : (
-        <FlatList
-          data={messages}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.messageContainer}>
-              <Text style={styles.sender}>{item.sender || "User"}:</Text>
-              <Text style={styles.message}>{item.content}</Text>
-            </View>
-          )}
-          inverted
-        />
-      )}
+      <Text style={styles.header}>🌿 Cummunity Chat</Text>
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderItem}
+        inverted
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      />
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
           value={newMessage}
           onChangeText={setNewMessage}
+          onSubmitEditing={sendMessage}
         />
         <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>Send</Text>
@@ -93,40 +128,74 @@ const ChatBox = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9" },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  welcome: { fontSize: 18, marginBottom: 20 },
-  messageContainer: {
-    marginBottom: 10,
+  container: {
+    flex: 1,
+    backgroundColor: "#eafaf1",
     padding: 10,
-    backgroundColor: "#e1e1e1",
-    borderRadius: 10,
   },
-  sender: { fontWeight: "bold" },
-  message: { fontSize: 16 },
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
+    color: "#2d6a4f",
+  },
+  messageBubble: {
+    padding: 10,
+    borderRadius: 12,
+    marginVertical: 5,
+    maxWidth: "75%",
+  },
+  userBubble: {
+    alignSelf: "flex-end",
+    backgroundColor: "#c7f9cc",
+  },
+  botBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: "#b7e4c7",
+  },
+  senderName: {
+    fontWeight: "bold",
+    marginBottom: 3,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  timestamp: {
+    fontSize: 10,
+    color: "#555",
+    marginTop: 4,
+    textAlign: "right",
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: "#ccc",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    backgroundColor: "#fff",
   },
   input: {
     flex: 1,
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    backgroundColor: "#fff",
   },
   sendButton: {
     marginLeft: 10,
-    backgroundColor: "#007bff",
+    backgroundColor: "#2d6a4f",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 20,
   },
-  sendButtonText: { color: "#fff", fontWeight: "bold" },
+  sendButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 });
 
 export default ChatBox;

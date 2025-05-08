@@ -16,6 +16,8 @@ import FarmIdentification from "../screeens/FarmIdentification";
 import PestAnalysis from "../screeens/PestAnalysis";
 import CummunityAndChat from "../screeens/CummunityAndChat";
 import ChatBox from "../screeens/ChatBox";
+import DetailsWeather from "../screeens/DetailsWeather";
+import Botanic from "../screeens/Botanic";
 
 
 const Stack = createStackNavigator();
@@ -38,13 +40,18 @@ const AppNavigator = () => {
             component={ProfileScreen} 
             options={{ headerShown: true, title: 'Profile' }} 
           />
+           <Stack.Screen 
+            name="DetailWeather" 
+            component={DetailsWeather} 
+            options={{ headerShown: true, title: 'Weather' }} 
+          />
           <Stack.Screen 
             name="Settings" 
             component={SettingsScreen} 
             options={{ headerShown: true, title: 'Settings' }} 
           />
           <Stack.Screen 
-            name="Notifictions" 
+            name="Notification" 
             component={Notifictions} 
             options={{ headerShown: true, title: 'Notifications' }} 
           />
@@ -54,7 +61,7 @@ const AppNavigator = () => {
             options={{ headerShown: true, title: 'Soil Analysis' }} 
           />
           <Stack.Screen 
-            name="PrivacyAndSecurity" 
+            name="privacyAndSecurity" 
             component={PrivacyAndSecurity} 
             options={{ headerShown: true, title: 'Privacy and Security' }} 
           />
@@ -74,7 +81,7 @@ const AppNavigator = () => {
             options={{ headerShown: true, title: 'Pest Analysis' }} 
           />
           <Stack.Screen 
-            name="CummuntyChat" 
+            name="CummunityChat" 
             component={CummunityAndChat} 
             options={{ headerShown: true, title: 'Cummunity Chat' }} 
           />
@@ -82,6 +89,11 @@ const AppNavigator = () => {
             name="ChatBox" 
             component={ChatBox} 
             options={{ headerShown: true, title: 'Chat' }} 
+          />
+          <Stack.Screen 
+            name="Botanic" 
+            component={Botanic} 
+            options={{ headerShown: true, title: 'Botanic' }} 
           />
         </>
       ) : (

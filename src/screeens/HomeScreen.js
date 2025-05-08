@@ -1,44 +1,102 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import WeatherSection from './WeatherSection';
-const HomeScreen = ({ navigation }) => {
+import { AuthContext } from "../context/AuthContext";
 
+const HomeScreen = ({ navigation }) => {
+  // State for pull-to-refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { user } = useContext(AuthContext);
+
+  // Function to simulate a refresh
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    // Simulate a network request delay
+    setTimeout(() => {
+      setIsRefreshing(false); // Stop refreshing after the simulated delay
+    }, 2000); // 2 seconds refresh time (adjust as needed)
+  };
 
   return (
     <View style={styles.container}>
       {/* Header with Icons */}
       <View style={styles.header}>
-        <Text style={styles.farmName}>Farm's Name</Text>
+      {user && <Text style={styles.farmName}>Welcome, {user.username}</Text>}
+
         <View style={styles.iconContainer}>
-          <Icon name="user" size={24} color="gray" style={styles.icon} onPress={() => navigation.navigate('Profile')} />
-          <Icon name="bell" size={24} color="green" style={styles.icon} onPress={() => navigation.navigate('Notifications')} />
-          <Icon name="cog" size={24} color="green" style={styles.icon} onPress={() => navigation.navigate('Settings')} />
+          <Icon
+            name="user"
+            size={24}
+            color="gray"
+            style={styles.icon}
+            onPress={() => navigation.navigate('Profile')}
+          />
+          <Icon
+            name="bell"
+            size={24}
+            color="green"
+            style={styles.icon}
+            onPress={() => navigation.navigate('Notification')}
+          />
+          <Icon
+            name="cog"
+            size={24}
+            color="green"
+            style={styles.icon}
+            onPress={() => navigation.navigate('Settings')}
+          />
         </View>
       </View>
 
-      {/* Weather Section */}
-      <WeatherSection />
+      {/* Scrollable content with pull-to-refresh */}
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Weather Section */}
+        <WeatherSection onPress={() => navigation.navigate('DetailWeather')} />
 
-      {/* Buttons for Soil and Pest Analysis */}
-      <View style={styles.analysisContainer}>
-        <TouchableOpacity style={styles.analysisButton} onPress={() => navigation.navigate('SoilAnalysis')}>
-          <Text style={styles.analysisButtonText}>Soil Health Analysis</Text>
-        </TouchableOpacity>
+        {/* Buttons for Soil and Pest Analysis */}
+        <View style={styles.analysisContainer}>
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('SoilAnalysis')}
+          >
+            <Text style={styles.analysisButtonText}>Soil Health Analysis</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.analysisButton} onPress={() => navigation.navigate('FarmIdentification')}>
-          <Text style={styles.analysisButtonText}>Identify Suitable Farms</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('FarmIdentification')}
+          >
+            <Text style={styles.analysisButtonText}>Identify Farms</Text>
+          </TouchableOpacity>
 
-        {/* Placeholder buttons for additional features */}
-        <TouchableOpacity style={styles.analysisButton} onPress={() => navigation.navigate('PestAnalysis')}> 
-          <Text style={styles.analysisButtonText}>Pest Analysis</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('PestAnalysis')}
+          >
+            <Text style={styles.analysisButtonText}>Pest Analysis</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.analysisButton} onPress={() => navigation.navigate('CummuntyChat')}>
-          <Text style={styles.analysisButtonText}>Cummunity</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('CummunityChat')}
+          >
+            <Text style={styles.analysisButtonText}>Community</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('Botanic')}
+          >
+            <Text style={styles.analysisButtonText}>Ask Me ! </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -65,59 +123,8 @@ const styles = StyleSheet.create({
   icon: {
     marginHorizontal: 8,
   },
-  weatherContainer: {
-    backgroundColor: '#e6f5f3',
-    borderRadius: 10,
-    padding: 16,
-    marginVertical: 16,
-  },
-  weatherHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  weatherSubHeader: {
-    color: '#6b8e23',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  weatherLocation: {
-    color: '#6b8e23',
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  temperatureContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  weatherIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 8,
-  },
-  temperatureText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  weatherDescription: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 4,
-  },
-  weatherDetails: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 12,
-  },
-  weatherStatsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  weatherStat: {
-    fontSize: 14,
-    color: '#555',
+  scrollView: {
+    flex: 1,
   },
   analysisContainer: {
     flexDirection: 'row',
@@ -127,7 +134,7 @@ const styles = StyleSheet.create({
   analysisButton: {
     width: '45%',
     height: 100,
-    backgroundColor: '#a2dec8',
+    backgroundColor: 'green',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -135,7 +142,7 @@ const styles = StyleSheet.create({
   },
   analysisButtonText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#ffff',
     textAlign: 'center',
   },
 });

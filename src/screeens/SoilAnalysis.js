@@ -1,64 +1,73 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import React, { useState, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  Image, 
+  ActivityIndicator, 
+  Alert, 
+  StyleSheet, 
+  TouchableOpacity 
+} from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import axios from 'axios';
 import { BASE_URL } from '../utils/sharesUtils';
 
 const SoilAnalysis = () => {
+  const [hasPermission, requestPermission] = useCameraPermissions();
   const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back); // Set default camera type
   const [analysisResult, setAnalysisResult] = useState(null);
-  const [hasPermission, setHasPermission] = useState(null);
   const cameraRef = useRef(null);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync({ base64: true });
-      setImageUri(photo.uri);
-      processImage(photo.base64);
+      setLoading(true);
+      try {
+        const photo = await cameraRef.current.takePictureAsync({ base64: true });
+        setImageUri(photo.uri);
+
+        Alert.alert(
+          'Confirm',
+          'Is this a soil image? Proceed with analysis?',
+          [
+            { text: 'Cancel', onPress: () => setLoading(false), style: 'cancel' },
+            { text: 'Yes', onPress: () => analyzeSoil(photo.base64) },
+          ]
+        );
+      } catch (err) {
+        Alert.alert('Error', 'Unable to capture image.');
+        setLoading(false);
+      }
     }
   };
 
-  const processImage = async (base64Image) => {
-    setLoading(true);
+  const analyzeSoil = async (base64) => {
     try {
-      const base64Only = base64Image.split(',').pop();
-      console.log('Sending image data:', base64Only); // Debug log
-
+      const base64Only = base64.split(',').pop();
       const response = await axios.post(
-        `${BASE_URL}soil_analysis/predict/`,
+        `${BASE_URL}soilanalysis/`,
         { inputImage: base64Only },
         { headers: { 'Content-Type': 'application/json' } }
       );
-
-      console.log('Response received:', response.data); // Debug log
       setAnalysisResult(response.data);
-    } catch (error) {
-      console.error('Error during image analysis:', error.message);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } catch (err) {
+      Alert.alert('Error', 'Soil analysis failed.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (hasPermission === null) {
-    return <View />;
-  }
+  const reset = () => {
+    setImageUri(null);
+    setAnalysisResult(null);
+  };
 
-  if (hasPermission === false) {
+  if (!hasPermission) {
     return (
-      <View style={styles.container}>
-        <Text>No access to camera</Text>
-        <TouchableOpacity onPress={() => Camera.requestCameraPermissionsAsync()}>
-          <Text style={styles.buttonText}>Grant Permission</Text>
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>Camera permission required.</Text>
+        <TouchableOpacity onPress={requestPermission} style={styles.permissionButton}>
+          <Text style={styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
       </View>
     );
@@ -66,44 +75,42 @@ const SoilAnalysis = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Soil Health Analysis</Text>
-      
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-      {loading && <ActivityIndicator size={50} color="#4CAF50" />}
+      <Text style={styles.header}>Soil Analysis</Text>
 
-      {analysisResult && (
-        <View style={styles.tableContainer}>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>Phosphorus (P):</Text>
-            <Text style={styles.tableData}>{analysisResult.P} ds/m</Text>
+      {loading && <ActivityIndicator size="large" color="#4CAF50" />}
+
+      {!imageUri && !analysisResult && (
+        <CameraView style={styles.camera} ref={cameraRef}>
+          <View style={styles.cameraButtonWrapper}>
+            <TouchableOpacity style={styles.captureBtn} onPress={takePicture}>
+              <Text style={styles.captureText}>Capture</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>pH Level:</Text>
-            <Text style={styles.tableData}>{analysisResult.pH}%</Text>
-          </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>Organic Matter (OM):</Text>
-            <Text style={styles.tableData}>{analysisResult.OM} mg/kg</Text>
-          </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>Electrical Conductivity (EC):</Text>
-            <Text style={styles.tableData}>{analysisResult.EC} mole/l</Text>
-          </View>
-        </View>
+        </CameraView>
       )}
 
-      <Camera 
-        style={styles.camera} 
-        ref={cameraRef}
-        type={cameraType} // cameraType here is now valid
-      >
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.buttonText}>Take Photo</Text>
+      {imageUri && !analysisResult && !loading && (
+        <>
+          <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+          <TouchableOpacity style={styles.resetBtn} onPress={reset}>
+            <Text style={styles.resetText}>Retake</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {analysisResult && (
+        <View style={styles.resultBox}>
+          <Text style={styles.resultHeader}>Results:</Text>
+          <Text style={styles.resultItem}>Phosphorus (P): {analysisResult.P} ds/m</Text>
+          <Text style={styles.resultItem}>pH: {analysisResult.pH}</Text>
+          <Text style={styles.resultItem}>Organic Matter (OM): {analysisResult.OM} mg/kg</Text>
+          <Text style={styles.resultItem}>Electrical Conductivity (EC): {analysisResult.EC} mole/l</Text>
+
+          <TouchableOpacity style={styles.resetBtn} onPress={reset}>
+            <Text style={styles.resetText}>Analyze Another</Text>
           </TouchableOpacity>
         </View>
-      </Camera>
-
+      )}
     </View>
   );
 };
@@ -111,86 +118,96 @@ const SoilAnalysis = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fff',
+    padding: 16,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#2d6a4f',
-    marginBottom: 20,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#388e3c',
     textAlign: 'center',
-  },
-  image: {
-    width: 250,
-    height: 250,
-    marginVertical: 15,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  tableContainer: {
-    width: '100%',
-    marginVertical: 20,
-    backgroundColor: '#e3f9f5',
-    padding: 20,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tableHeader: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#00796b',
-    width: '60%',
-  },
-  tableData: {
-    fontSize: 16,
-    color: '#00796b',
-    width: '40%',
-    textAlign: 'right',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 25,
-    width: '80%',
-  },
-  button: {
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'center',
-    backgroundColor:'#4caf50',
-    paddingVertical :14,
-    marginHorizontal :12,
-    borderRadius :30,
-    elevation :5
-  },
-  buttonText: {
-    color:'#fff', 
-    fontSize :18 ,
-    fontWeight :'600'
+    marginBottom: 10,
   },
   camera: {
     flex: 1,
-    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  cameraButtonWrapper: {
+    position: 'absolute',
+    bottom: 20,
     width: '100%',
-  }
+    alignItems: 'center',
+  },
+  captureBtn: {
+    backgroundColor: '#4CAF50',
+    padding: 12,
+    borderRadius: 8,
+    width: 140,
+    alignItems: 'center',
+  },
+  captureText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 300,
+    borderRadius: 10,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  resultBox: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 10,
+  },
+  resultHeader: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2e7d32',
+    marginBottom: 8,
+  },
+  resultItem: {
+    fontSize: 16,
+    color: '#444',
+    marginBottom: 4,
+  },
+  resetBtn: {
+    backgroundColor: '#ff7043',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  resetText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  permissionText: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 12,
+  },
+  permissionButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 8,
+  },
+  permissionButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
 });
 
 export default SoilAnalysis;
