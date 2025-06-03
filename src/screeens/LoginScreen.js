@@ -31,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
 
             <TextInput
                 style={styles.input}
-                placeholder="Enter Username"
+                placeholder="Enter Email"
                 value={username}
                 onChangeText={setUsername}
                 placeholderTextColor="#aaa"

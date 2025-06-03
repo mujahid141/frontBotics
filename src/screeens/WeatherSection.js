@@ -43,6 +43,7 @@ const WeatherSection = ({ onPress }) => {
           }
           const data = await response.json();
           setWeatherData(data);
+          console.log(data)
         } catch (err) {
           setError(err.message);
         } finally {

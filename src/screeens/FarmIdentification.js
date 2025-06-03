@@ -4,16 +4,16 @@ import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { AuthContext } from "../context/AuthContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { getAreaOfPolygon } from 'geolib';
+import { BASE_URL } from "../utils/sharesUtils";
+import axios from "axios";
 const FarmIdentification = () => {
-  const { user } = useContext(AuthContext);
+  const { user , userToken} = useContext(AuthContext);
   const [userLocation, setUserLocation] = useState(null);
   const [startPoint, setStartPoint] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [boundingBox, setBoundingBox] = useState([]);
   const [mapRegion, setMapRegion] = useState(null);
-
-  
 
   useEffect(() => {
     const getLocationPermission = async () => {
@@ -30,7 +30,7 @@ const FarmIdentification = () => {
         longitudeDelta: 0.01,
       };
       setUserLocation(initialRegion);
-      setMapRegion(initialRegion); // Initialize map region
+      setMapRegion(initialRegion);
     };
 
     getLocationPermission();
@@ -99,6 +99,43 @@ const FarmIdentification = () => {
     }
   };
 
+  const generateFarmReport = () => {
+  if (boundingBox.length === 0) {
+    Alert.alert("No area selected", "Please select an area first.");
+    return;
+  }
+
+  const areaSqMeters = getAreaOfPolygon(boundingBox);
+  const areaHectares = (areaSqMeters / 10000).toFixed(2);
+
+  const now = new Date();
+  const selectedAtISO = now.toISOString();
+
+  // Round lat/lng to 6 decimal places
+  const roundedLatitude = Number(mapRegion.latitude.toFixed(6));
+  const roundedLongitude = Number(mapRegion.longitude.toFixed(6));
+
+  const report = {
+    coordinates: boundingBox,
+    estimated_area: `${areaHectares} ha`,
+    selected_at: selectedAtISO,
+    latitude: roundedLatitude,
+    longitude: roundedLongitude
+  };
+
+  console.log("Farm Report:", report);
+
+  Alert.alert("Farm Report", `Estimated Area: ${areaHectares} hectares`);
+
+  axios.post(`${BASE_URL}farm/farm-reports/`, report, {
+    headers: { Authorization: `Token ${userToken}` }
+  })
+  .then(res => console.log("Saved:", res.data))
+  .catch(err => console.error("Error saving:", err.response?.data || err));
+};
+
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Farm Selection</Text>
@@ -131,7 +168,12 @@ const FarmIdentification = () => {
           </MapView>
           <View style={styles.controls}>
             <Button title="Reset Selection" onPress={resetSelection} color="#FF6347" />
-            {boundingBox.length > 0 && <Button title="Confirm Selection" onPress={saveCoordinates} />}
+            {boundingBox.length > 0 && (
+              <>
+                <Button title="Confirm Selection" onPress={saveCoordinates} />
+                <Button title="Save Your Farm DataData" onPress={generateFarmReport} color="#4682B4" />
+              </>
+            )}
           </View>
         </>
       ) : (
@@ -169,6 +211,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginVertical: 10,
+    flexWrap: "wrap",
+    gap: 10,
   },
 });
 

@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Image } from "react-native";
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 import { BASE_URL } from '../utils/sharesUtils';
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const PestAnalysis = () => {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [loading, setLoading] = useState(false);
+    const {user,userToken} = useContext(AuthContext)
 
     const requestPermissions = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -61,7 +63,10 @@ const PestAnalysis = () => {
                 `${BASE_URL}pestanddisease/`,
                 { image: base64Image },
                 {
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json',
+                        'Authorization': `Token ${userToken}`,
+                     },
+
                 }
             );
             console.log("Analysis response:", response.data);

@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL } from '../config/apiConfig';
+import { BASE_URL } from '../utils/sharesUtils';
+
 
 const ForgotPasswordScreen = () => {
     const [email, setEmail] = useState('');
     const navigation = useNavigation();
 
     const handleResetPassword = async () => {
+        
         // Check if email is empty
         if (!email.trim()) {
             Alert.alert('Error', 'Please enter your email');

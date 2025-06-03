@@ -95,6 +95,12 @@ const HomeScreen = ({ navigation }) => {
           >
             <Text style={styles.analysisButtonText}>Ask Me ! </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.analysisButton}
+            onPress={() => navigation.navigate('Report')}
+          >
+            <Text style={styles.analysisButtonText}>Analyze your farm  </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

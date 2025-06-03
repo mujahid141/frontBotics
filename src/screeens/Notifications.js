@@ -27,7 +27,7 @@ const Notifications = () => {
 
     return (
         <View style={styles.container}>
-            {user && <Text style={styles.welcomeText}>Welcome, {user.name}!</Text>}
+            {user && <Text style={styles.welcomeText}>Welcome, {user.username}!</Text>}
 
             <Text style={styles.headerText}>Notifications</Text>
 

@@ -80,7 +80,7 @@ const ChatBox = () => {
 
   const renderItem = ({ item }) => {
     const isUser = isCurrentUser(item.sender);
-    const senderName = isUser ? "You" : "Botanic";
+    const senderName = isUser ? "You"   : " ananomys ";
 
     return (
       <View
@@ -89,8 +89,8 @@ const ChatBox = () => {
           isUser ? styles.userBubble : styles.botBubble,
         ]}
       >
-        <Text style={styles.senderName}>{}</Text>
-        <Text style={styles.messageText}>{item.sender}</Text>
+        <Text style={styles.senderName}>{item.sender}</Text>
+        <Text style={styles.messageText}>{item.content}</Text>
         <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
       </View>
     );

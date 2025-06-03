@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
         setUserLoading(true); // Start loading user details
         try {
             const userDetails = await getUserDetails(token); // Call the service to fetch user details
+            
             setUser(userDetails); // Set user data in state
         } catch (error) {
             console.error('Error fetching user details:', error);

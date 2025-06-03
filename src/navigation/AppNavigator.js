@@ -18,6 +18,7 @@ import CummunityAndChat from "../screeens/CummunityAndChat";
 import ChatBox from "../screeens/ChatBox";
 import DetailsWeather from "../screeens/DetailsWeather";
 import Botanic from "../screeens/Botanic";
+import Report from "../screeens/Report";
 
 
 const Stack = createStackNavigator();
@@ -39,6 +40,11 @@ const AppNavigator = () => {
             name="Profile" 
             component={ProfileScreen} 
             options={{ headerShown: true, title: 'Profile' }} 
+          />
+          <Stack.Screen 
+            name="Report" 
+            component={Report} 
+            options={{ headerShown: true, title: 'Report' }} 
           />
            <Stack.Screen 
             name="DetailWeather" 

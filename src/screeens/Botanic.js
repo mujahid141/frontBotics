@@ -1,12 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../utils/sharesUtils'; // Adjust path as needed
+import { AuthContext } from '../context/AuthContext';
 
 const Botanic = () => {
   const [messages, setMessages] = useState([
     { id: 1, text: 'Hello! How can I assist you with your farm today?', sender: 'FarmBotics Bot' },
   ]);
+
+  const { user, userToken } = useContext(AuthContext); // ✅ Make sure token is provided in context
   const [userInput, setUserInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const scrollViewRef = useRef();
@@ -26,9 +29,15 @@ const Botanic = () => {
     // Simulate delay
     setTimeout(async () => {
       try {
-        const response = await axios.post(`${BASE_URL}bot/get_answer/`, {
-          question: trimmedInput,
-        });
+        const response = await axios.post(
+          `${BASE_URL}bot/get_answer/`,
+          { question: trimmedInput }, // body data
+          {
+            headers: {
+              'Authorization': `Token ${userToken}`,
+            }
+          }
+        );
   
         // Remove temporary "thinking" message
         setMessages(prev => prev.filter(msg => !msg.isTemporary));
@@ -36,7 +45,7 @@ const Botanic = () => {
         const botMessage = {
           id: Math.random(),
           text: response.data.answer || "Hmm... I couldn't come up with a response.",
-          sender: 'FarmBotics Bot',
+          sender: 'Botonic ',
         };
         setMessages(prev => [...prev, botMessage]);
       } catch (error) {
@@ -45,7 +54,7 @@ const Botanic = () => {
         const errorMessage = {
           id: Math.random(),
           text: "Sorry, something went wrong. Please try again later.",
-          sender: 'FarmBotics Bot',
+          sender: 'Botanic',
         };
         setMessages(prev => [...prev, errorMessage]);
       }
