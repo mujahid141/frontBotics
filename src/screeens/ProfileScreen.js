@@ -1,51 +1,58 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { AuthContext } from '../context/AuthContext'; 
 import { BASE_URL } from '../utils/sharesUtils';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios'; // ✅ Correct import
 
 const ProfileEditScreen = () => {
-  const { user } = useContext(AuthContext);
-  const [userDetails, setUserDetails] = useState(user);
+  const { user, userToken } = useContext(AuthContext); // ✅ Make sure token is provided in context
+  const [userDetails, setUserDetails] = useState({});
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
   const [address, setAddress] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user.id) {
+    console.log(user)
+    if (user.pk) {
       fetchUserDetails();
     }
-  }, [user.id]);
+  }, [user.pk]);
 
   const fetchUserDetails = async () => {
+    console.log(userToken)
     try {
-      const response = await fetch(`${BASE_URL}users/profile/${user.id}/`);
-      const data = await response.json();
+      const response = await axios.get(`${BASE_URL}profile/`, {
+        headers: {
+          'Authorization': `Token ${userToken}`,
+        }
+      });
+      const data = response.data;
       setUserDetails(data);
-      setUsername(data.username);
-      setBio(data.bio);
-      setLocation(data.location);
-      setAddress(data.address);
+      setBio(data.bio || '');
+      setAddress(data.address || '');
     } catch (error) {
       console.error('Error fetching user details:', error);
       Alert.alert('Error', 'Unable to fetch user details.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveProfile = async () => {
     try {
       const updatedData = { username, bio, location, address };
-      const response = await fetch(`${BASE_URL}users/profile/${user.id}/`, {
-        method: 'PUT',
+      const response = await axios.put(`${BASE_URL}profile/`, updatedData, {
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
+          'Authorization': `Token ${userToken}`,
+        }
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 204) {
         Alert.alert('Success', 'Profile updated successfully!');
         setIsEditing(false);
         fetchUserDetails();
@@ -62,10 +69,13 @@ const ProfileEditScreen = () => {
     setIsEditing(!isEditing);
   };
 
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <View style={styles.profileHeader}>
-       
         <TouchableOpacity onPress={handleEditToggle} style={styles.editIconContainer}>
           <MaterialIcons name={isEditing ? 'check' : 'edit'} size={24} color="#fff" />
         </TouchableOpacity>
@@ -73,60 +83,21 @@ const ProfileEditScreen = () => {
 
       {isEditing ? (
         <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Bio"
-            value={bio}
-            onChangeText={setBio}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={location}
-            onChangeText={setLocation}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Address"
-            value={address}
-            onChangeText={setAddress}
-            placeholderTextColor="#aaa"
-          />
+          <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
+          <TextInput style={styles.input} placeholder="Bio" value={bio} onChangeText={setBio} />
+          <TextInput style={styles.input} placeholder="Location" value={location} onChangeText={setLocation} />
+          <TextInput style={styles.input} placeholder="Address" value={address} onChangeText={setAddress} />
           <TouchableOpacity onPress={handleSaveProfile} style={styles.button}>
             <Text style={styles.buttonText}>Save Profile</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.detailsContainer}>
-          <View style={styles.detailItem}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.info}>{user.email}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.label}>Username:</Text>
-            <Text style={styles.info}>{user.username}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.label}>Address:</Text>
-            <Text style={styles.info}>{userDetails.address}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.label}>Location:</Text>
-            <Text style={styles.info}>{userDetails.location}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.label}>Bio:</Text>
-            <Text style={styles.info}>{userDetails.bio}</Text>
-          </View>
+          <Text style={styles.label}>Email: <Text style={styles.info}>{user.email}</Text></Text>
+          <Text style={styles.label}>Username: <Text style={styles.info}>{userDetails.username}</Text></Text>
+          <Text style={styles.label}>Address: <Text style={styles.info}>{userDetails.address}</Text></Text>
+          <Text style={styles.label}>Location: <Text style={styles.info}>{userDetails.location}</Text></Text>
+          <Text style={styles.label}>Bio: <Text style={styles.info}>{userDetails.bio}</Text></Text>
         </View>
       )}
     </ScrollView>
@@ -134,81 +105,16 @@ const ProfileEditScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f7',
-    paddingHorizontal: 16,
-  },
-  profileHeader: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 20,
-  },
-  username: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  editIconContainer: {
-    backgroundColor: '#007BFF',
-    padding: 10,
-    borderRadius: 20,
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  input: {
-    height: 50,
-    borderColor: '#007BFF',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingLeft: 15,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  button: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  detailsContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  detailItem: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  info: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 5,
-  },
+  container: { flex: 1, padding: 20 },
+  profileHeader: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 20 },
+  editIconContainer: { backgroundColor: '#007AFF', padding: 8, borderRadius: 20 },
+  formContainer: {},
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginVertical: 5, borderRadius: 8 },
+  button: { backgroundColor: '#007AFF', padding: 15, borderRadius: 8, marginTop: 10 },
+  buttonText: { color: '#fff', textAlign: 'center' },
+  detailsContainer: {},
+  label: { fontWeight: 'bold', marginTop: 10 },
+  info: { fontWeight: 'normal' },
 });
 
 export default ProfileEditScreen;

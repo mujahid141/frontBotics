@@ -14,9 +14,9 @@ const apiClient = axios.create({
 });
 
 // Login service
-export const loginUser = async (username, password) => {
+export const loginUser = async (email, password) => {
   try {
-    const response = await apiClient.post('/auth/login/', { username, password });
+    const response = await apiClient.post('/auth/login/', { email, password });
     const { key } = response.data;
 
     if (key && typeof key === 'string') {
@@ -51,6 +51,7 @@ export const getUserDetails = async (token) => {
         Authorization: `Token ${token}`,
       },
     });
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error('Error fetching user details:', error);
