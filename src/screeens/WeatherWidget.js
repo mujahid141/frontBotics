@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import { use } from 'react';
 
 const screenWidth = Dimensions.get('window').width;
 
 const WeatherWidget = () => {
+    
+    const [weatherData, setWeatherData] = React.useState(null);
+    const fetchWeatherData = async () => {
+  const apiKey = "05ea4cd6d47547b8aa1153123242512"; // 🔑 Replace with your real WeatherAPI key
+  const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${farmData.latitude},${farmData.longitude}&days=5&aqi=no&alerts=no`;
+
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
+
+    
+    
+    setWeatherData(data.forecast.forecastday); 
+    
+    // NOTE: corrected typo from `forcast` to `forecast`
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+    fetchWeatherData();
+}
+, []);
+
+    const forecast = weatherData ? weatherData.forecastday : [];
+
+    const labels = forecast.map(day => {
+        const date = new Date(day.date);
+        return date.toLocaleDateString('en-US', { weekday: 'short' }); // e.g., Mon, Tue
+    });
+
+    const temps = forecast.map(day => day.day.avgtemp_c);
+
+    const current = weatherData.current;
+
     return (
-        <View style={styles.card}>
+       (weatherData != null) ? (
+       <View style={styles.card}>
             <View style={styles.row}>
                 <Image
                     source={{ uri: 'https://cdn-icons-png.flaticon.com/512/1116/1116453.png' }}
@@ -15,15 +55,15 @@ const WeatherWidget = () => {
                 />
                 <Text style={styles.title}>Weather Info</Text>
             </View>
-            <Text style={styles.label}>Current Temp: <Text style={styles.value}>28°C</Text></Text>
-            <Text style={styles.label}>Humidity: <Text style={styles.value}>65%</Text></Text>
-            <Text style={styles.label}>Rainfall Chance: <Text style={styles.value}>30%</Text></Text>
+            <Text style={styles.label}>Current Temp: <Text style={styles.value}>{current.temp_c}°C</Text></Text>
+            <Text style={styles.label}>Humidity: <Text style={styles.value}>{current.humidity}%</Text></Text>
+            <Text style={styles.label}>Rainfall Chance: <Text style={styles.value}>{forecast[0].day.daily_chance_of_rain}%</Text></Text>
 
             <Text style={styles.subheading}>Next 5 Days Forecast</Text>
             <LineChart
                 data={{
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                    datasets: [{ data: [28, 29, 27, 30, 31] }]
+                    labels: labels,
+                    datasets: [{ data: temps }]
                 }}
                 width={screenWidth - 40}
                 height={200}
@@ -39,9 +79,14 @@ const WeatherWidget = () => {
                 bezier
                 style={{ marginTop: 10, borderRadius: 8 }}
             />
+        </View>):(
+        <View style={styles.card}>
+            <Text style={styles.label}>Loading weather data...</Text>
         </View>
+       )
     );
 };
+
 
 const styles = StyleSheet.create({
     card: {

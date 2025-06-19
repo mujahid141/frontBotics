@@ -19,6 +19,9 @@ import ChatBox from "../screeens/ChatBox";
 import DetailsWeather from "../screeens/DetailsWeather";
 import Botanic from "../screeens/Botanic";
 import Report from "../screeens/Report";
+import PaymentScreen from "../screeens/PaymentScreen";
+import PaymentConfirm from "../screeens/PaymentConfirm";
+import PasswordConfirm from "../screeens/PasswordConfirm";
 
 
 const Stack = createStackNavigator();
@@ -101,6 +104,16 @@ const AppNavigator = () => {
             component={Botanic} 
             options={{ headerShown: true, title: 'Botanic' }} 
           />
+           <Stack.Screen 
+            name="Payment" 
+            component={PaymentScreen} 
+            options={{ headerShown: true, title: 'Payment' }} 
+          />
+          <Stack.Screen 
+            name="PaymentConfirm" 
+            component={PaymentConfirm} 
+            options={{ headerShown: true, title: 'Payment Confirm' }} 
+          />
         </>
       ) : (
         // Show unauthenticated screens
@@ -123,6 +136,11 @@ const AppNavigator = () => {
           <Stack.Screen 
             name="ResetPassword" 
             component={ResetPassword} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="PasswordConfirm" 
+            component={PasswordConfirm} 
             options={{ headerShown: false }} 
           />
         </>

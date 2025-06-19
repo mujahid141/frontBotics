@@ -7,7 +7,7 @@ import { BASE_URL } from '../utils/sharesUtils';
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const SoilAnalysis = () => {
+const SoilAnalysis = ({navigation}) => {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imageUri, setImageUri] = useState(null);
@@ -59,35 +59,62 @@ const SoilAnalysis = () => {
         }
     };
 
-    const analyzeSoil = async (uri) => {
-      setLoading(true);
-      try {
-          const base64 = await FileSystem.readAsStringAsync(uri, {
-              encoding: FileSystem.EncodingType.Base64,
-          });
-  
-          const response = await axios.post(
-              `${BASE_URL}soilanalysis/`,
-              {
-                  inputImage: base64, // No "data:image/jpeg;base64," prefix
-              },
-              {
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Token ${userToken}`,
-                  },
-              }
-          );
-  
-          // Django returns the final response after calling Flask and saving to DB
-          setAnalysisResult(response.data);
-      } catch (error) {
-          Alert.alert("Error", "Soil analysis failed.");
-          console.error("Soil analysis error:", error.response?.data || error.message);
-      } finally {
-          setLoading(false);
-      }
-  };
+
+
+
+
+
+
+const analyzeSoil = async (uri) => {
+    Alert.alert(
+        "Reminder",
+        "Please make sure to upload a soil image to get relevant and accurate results.",
+        [
+            {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => {
+                    console.log("User canceled soil analysis.");
+                    navigation.replace('SoilAnalysis');
+
+                }
+            },
+            {
+                text: "Continue",
+                onPress: async () => {
+                    setLoading(true);
+                    try {
+                        const base64 = await FileSystem.readAsStringAsync(uri, {
+                            encoding: FileSystem.EncodingType.Base64,
+                        });
+
+                        const response = await axios.post(
+                            `${BASE_URL}soilanalysis/`,
+                            {
+                                inputImage: base64,
+                            },
+                            {
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Token ${userToken}`,
+                                },
+                            }
+                        );
+
+                        setAnalysisResult(response.data);
+                    } catch (error) {
+                        Alert.alert("Error", "Soil analysis failed.");
+                        console.error("Soil analysis error:", error.response?.data || error.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            }
+        ]
+    );
+};
+
+
   
 
     return (

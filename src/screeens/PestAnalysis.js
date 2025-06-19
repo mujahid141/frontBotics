@@ -58,7 +58,9 @@ const PestAnalysis = () => {
         setLoading(true);
         try {
             const base64Image = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
-
+            
+            
+            
             const response = await axios.post(
                 `${BASE_URL}pestanddisease/`,
                 { image: base64Image },
@@ -79,6 +81,7 @@ const PestAnalysis = () => {
     };
 
     return (
+        
         <View style={styles.container}>
             <Text style={styles.header}>Pest Analysis</Text>
 

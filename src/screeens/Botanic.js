@@ -6,7 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const Botanic = () => {
   const [messages, setMessages] = useState([
-    { id: 1, text: 'Hello! How can I assist you with your farm today?', sender: 'FarmBotics Bot' },
+    { id: 1, text: 'Hello! How can I assist you with your farm today?', sender: 'Botanic' },
   ]);
 
   const { user, userToken } = useContext(AuthContext); // ✅ Make sure token is provided in context
@@ -23,7 +23,7 @@ const Botanic = () => {
     setUserInput('');
     setIsThinking(true);
   
-    const thinkingMessage = { id: Math.random(), text: 'Thinking...', sender: 'FarmBotics Bot', isTemporary: true };
+    const thinkingMessage = { id: Math.random(), text: 'Thinking...', sender: 'Botanic', isTemporary: true };
     setMessages(prev => [...prev, thinkingMessage]);
   
     // Simulate delay
@@ -45,7 +45,7 @@ const Botanic = () => {
         const botMessage = {
           id: Math.random(),
           text: response.data.answer || "Hmm... I couldn't come up with a response.",
-          sender: 'Botonic ',
+          sender: 'Botanic ',
         };
         setMessages(prev => [...prev, botMessage]);
       } catch (error) {
@@ -53,7 +53,7 @@ const Botanic = () => {
   
         const errorMessage = {
           id: Math.random(),
-          text: "Sorry, something went wrong. Please try again later.",
+          text: "Sorry, Please ask something related to farming and Agriculture . Please try again later.",
           sender: 'Botanic',
         };
         setMessages(prev => [...prev, errorMessage]);

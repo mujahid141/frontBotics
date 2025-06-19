@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-
-const FarmWidget = () => {
+const FarmWidget = ({ latitude, longitude, area, location }) => {
     return (
         <View style={styles.card}>
             <View style={styles.row}>
@@ -11,13 +10,13 @@ const FarmWidget = () => {
                 />
                 <Text style={styles.title}>Farm Info</Text>
             </View>
-            <Text style={styles.label}>Location: <Text style={styles.value}>Lahore, Pakistan</Text></Text>
-            <Text style={styles.label}>Area: <Text style={styles.value}>5 Acres</Text></Text>
+            <Text style={styles.label}>Area: <Text style={styles.value}>{area}</Text></Text>
             <Text style={styles.label}>Coordinates:</Text>
-            <Text style={styles.value}>Lat: 31.5204° N, Long: 74.3587° E</Text>
+            <Text style={styles.value}>Lat: {latitude}, Long: {longitude}</Text>
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     card: {

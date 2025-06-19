@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
 
-const SoilAnalysisWidget = () => {
+const SoilAnalysisWidget = ({ data }) => {
+    if (!data) return null;
+
+    const { avg_ph, avg_phosphorus, avg_organic_matter, avg_electrical_conductivity } = data;
+
     return (
         <View style={styles.card}>
             <View style={styles.row}>
@@ -16,20 +19,19 @@ const SoilAnalysisWidget = () => {
                 <Text style={styles.title}>Soil Analysis</Text>
             </View>
 
-            <Text style={styles.label}>pH Level: <Text style={styles.value}>6.8</Text></Text>
-            <Text style={styles.label}>Phosphorus: <Text style={styles.value}>40 mg/kg</Text></Text>
-            <Text style={styles.label}>Organic Matter: <Text style={styles.value}>3.2%</Text></Text>
-            <Text style={styles.label}>EC: <Text style={styles.value}>0.8 dS/m</Text></Text>
+            <Text style={styles.label}>pH Level: <Text style={styles.value}>{avg_ph}</Text></Text>
+            <Text style={styles.label}>Phosphorus: <Text style={styles.value}>{avg_phosphorus} mg/kg</Text></Text>
+            <Text style={styles.label}>Organic Matter: <Text style={styles.value}>{avg_organic_matter}%</Text></Text>
+            <Text style={styles.label}>EC: <Text style={styles.value}>{avg_electrical_conductivity} dS/m</Text></Text>
 
             <Text style={styles.subheading}>Soil Nutrient Levels</Text>
             <BarChart
                 data={{
                     labels: ['pH', 'P', 'OM', 'EC'],
-                    datasets: [{ data: [6.8, 40, 3.2, 0.8] }],
+                    datasets: [{ data: [avg_ph, avg_phosphorus, avg_organic_matter, avg_electrical_conductivity] }],
                 }}
                 width={screenWidth - 40}
                 height={200}
-                yAxisSuffix=""
                 chartConfig={{
                     backgroundColor: '#fff',
                     backgroundGradientFrom: '#f1f8e9',
@@ -37,8 +39,11 @@ const SoilAnalysisWidget = () => {
                     decimalPlaces: 1,
                     color: (opacity = 1) => `rgba(124, 179, 66, ${opacity})`,
                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    barPercentage: 0.5,
                 }}
-                style={{ marginTop: 12, borderRadius: 8 }}
+                style={styles.chartStyle}
+                fromZero={true}
+                withInnerLines={false}
             />
         </View>
     );
@@ -86,6 +91,11 @@ const styles = StyleSheet.create({
     value: {
         fontWeight: '500',
         color: '#000',
+    },
+    chartStyle: {
+        marginTop: 12,
+        borderRadius: 8,
+        marginLeft: -16, // shift chart slightly to the left
     },
 });
 

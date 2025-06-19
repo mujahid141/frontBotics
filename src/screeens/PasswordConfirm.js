@@ -5,65 +5,68 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { BASE_URL } from '../utils/sharesUtils';
 
-const ResetPassword = () => {
+const PasswordConfirm = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const navigation = useNavigation();
 
     useEffect(() => {
-        const loadEmail = async () => {
+        const loadData = async () => {
             const storedEmail = await AsyncStorage.getItem('reset_email');
-            if (storedEmail) {
-                setEmail(storedEmail);
-            } else {
-                Alert.alert('Error', 'No email found. Please request a reset again.');
+            const storedOtp = await AsyncStorage.getItem('reset_otp');
+            if (!storedEmail || !storedOtp) {
+                Alert.alert('Error', 'Missing data. Please try the reset process again.');
                 navigation.navigate('ForgotPassword');
+                return;
             }
+            setEmail(storedEmail);
+            setOtp(storedOtp);
         };
-        loadEmail();
+        loadData();
     }, []);
 
-    const handleVerifyOTP = async () => {
-        if (!otp.trim()) {
-            Alert.alert('Error', 'Please enter the OTP sent to your email.');
+    const handleResetPassword = async () => {
+        if (!newPassword.trim()) {
+            Alert.alert('Error', 'Please enter a new password.');
             return;
         }
 
         try {
-            const response = await axios.post(`${BASE_URL}profile/password-reset/verify/`, {
+            const response = await axios.post(`${BASE_URL}profile/password-reset/confirm/`, {
                 email,
                 otp:String(otp),
+                new_password: newPassword
             });
 
             if (response.status === 200) {
-                await AsyncStorage.setItem('reset_otp', otp);
-                Alert.alert('Success', 'OTP verified. You can now reset your password.');
-                navigation.navigate('PasswordConfirm'); // move to password screen
+                await AsyncStorage.multiRemove(['reset_email', 'reset_otp']);
+                Alert.alert('Success', 'Your password has been updated.');
+                navigation.navigate('Login');
             }
         } catch (error) {
             console.error(error);
-            const errorMsg = error.response?.data?.detail || 'Invalid OTP. Please try again.';
-            Alert.alert('Verification Failed', errorMsg);
+            const errorMsg = error.response?.data?.detail || 'Failed to reset password.';
+            Alert.alert('Reset Failed', errorMsg);
         }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Verify OTP</Text>
+            <Text style={styles.title}>Set New Password</Text>
             <Image source={require('../../assets/forgotlogo.png')} style={styles.logo} />
-            <Text style={styles.label}>Email: {email}</Text>
 
             <TextInput
                 style={styles.input}
-                placeholder="Enter OTP"
-                value={otp}
-                onChangeText={setOtp}
-                keyboardType="numeric"
+                placeholder="New Password"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry={true}
                 placeholderTextColor="#888"
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleVerifyOTP}>
-                <Text style={styles.buttonText}>Verify OTP</Text>
+            <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
+                <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -89,11 +92,6 @@ const styles = StyleSheet.create({
     logo: {
         width: 120,
         height: 120,
-        marginBottom: 10,
-    },
-    label: {
-        fontSize: 14,
-        color: '#555',
         marginBottom: 10,
     },
     input: {
@@ -127,4 +125,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ResetPassword;
+export default PasswordConfirm;

@@ -3,33 +3,43 @@ import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } fro
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { BASE_URL } from '../utils/sharesUtils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const ForgotPasswordScreen = () => {
     const [email, setEmail] = useState('');
     const navigation = useNavigation();
+    const [isDisabled, setIsDisabled] = useState(false);
 
-    const handleResetPassword = async () => {
-        
-        // Check if email is empty
-        if (!email.trim()) {
-            Alert.alert('Error', 'Please enter your email');
-            return;
+const handleResetPassword = async () => {
+     setIsDisabled(true);
+    if (!email.trim()) {
+        Alert.alert('Error', 'Please enter your email');
+        setIsDisabled(false);
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${BASE_URL}profile/password-reset/request/`, {
+             email,
+        });
+
+        if (response.status === 200) {
+            await AsyncStorage.setItem('reset_email', email);  // store email
+            Alert.alert('Success', 'OTP has been sent to your email.');
+            navigation.navigate('ResetPassword');  // You can also pass email as param
         }
+    } catch (error) {
+        if (error.response?.data?.detail) {
+            Alert.alert('Error', error.response.data.detail);
+            setIsDisabled(false);
+        } else {
+            Alert.alert('Error', 'Something went wrong. Please try again.');
+            setIsDisabled(false);
+        }
+    }
+};
 
-      
-            // Make the API request
-            const response = await axios.post(`${BASE_URL}auth/password/reset/`, {
-                email, // Pass email as expected by backend
-            });
-
-           
-            if (response.status === 200) {
-                Alert.alert('Success', 'Password reset link sent! Please check your email.');
-                navigation.navigate('Login'); // Navigate to ResetPassword screen
-            }
-        
-    };
 
     return (
         <View style={styles.container}>
@@ -46,8 +56,8 @@ const ForgotPasswordScreen = () => {
                 placeholderTextColor="#888"
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-                <Text style={styles.buttonText}>Send Reset Link</Text>
+            <TouchableOpacity style={[styles.button, isDisabled && styles.disabledButton]} disabled={isDisabled} onPress={handleResetPassword}>
+                <Text style={styles.buttonText}>Get Reset OTP</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -58,6 +68,9 @@ const ForgotPasswordScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    disabledButton: {
+    backgroundColor: '#ccc',
+},
     container: {
         flex: 1,
         justifyContent: 'center',
