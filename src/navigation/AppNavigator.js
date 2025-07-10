@@ -19,16 +19,42 @@ import ChatBox from "../screeens/ChatBox";
 import DetailsWeather from "../screeens/DetailsWeather";
 import Botanic from "../screeens/Botanic";
 import Report from "../screeens/Report";
+import IpInputScreen from "../screeens/IpInputScreen";
 import PaymentScreen from "../screeens/PaymentScreen";
 import PaymentConfirm from "../screeens/PaymentConfirm";
 import PasswordConfirm from "../screeens/PasswordConfirm";
-
-
+import { initBaseUrl } from '../utils/sharesUtils';
+import { useState,useEffect } from "react";
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
+  
   const { userToken } = useContext(AuthContext); // Check if user is authenticated
 
+  const [ipSet, setIpSet] = useState(false); // null = loading, false = not set, true = set
+
+  useEffect(() => {
+    const checkIp = async () => {
+      const ip = await AsyncStorage.getItem('user_ip');
+      if (ip) {
+        await initBaseUrl();
+        setIpSet(true);
+      } else {
+        setIpSet(false);
+      }
+    };
+    checkIp();
+  }, []);
+
+  if (ipSet === null) return null; // Or show splash
+
+  if (!ipSet) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="IpInput" component={IpInputScreen} />
+      </Stack.Navigator>
+    );
+  }
   return (
     <Stack.Navigator>
       {userToken ? (
