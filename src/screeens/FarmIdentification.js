@@ -5,7 +5,7 @@ import * as Location from "expo-location";
 import { AuthContext } from "../context/AuthContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAreaOfPolygon } from 'geolib';
-import { BASE_URL } from "../utils/sharesUtils";
+import { getBaseUrl } from '../utils/sharesUtils';
 import axios from "axios";
 const FarmIdentification = () => {
   const { user , userToken} = useContext(AuthContext);
@@ -127,7 +127,7 @@ const FarmIdentification = () => {
 
   Alert.alert("Farm Report", `Estimated Area: ${areaHectares} hectares`);
 
-  axios.post(`${BASE_URL}farm/farm-reports/`, report, {
+  axios.post(`${getBaseUrl()}farm/farm-reports/`, report, {
     headers: { Authorization: `Token ${userToken}` }
   })
   .then(res => console.log("Saved:", res.data))

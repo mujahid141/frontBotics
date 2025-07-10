@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, Alert, Image } from "react-na
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
@@ -62,7 +62,7 @@ const PestAnalysis = () => {
             
             
             const response = await axios.post(
-                `${BASE_URL}pestanddisease/`,
+                `${getBaseUrl()}pestanddisease/`,
                 { image: base64Image },
                 {
                     headers: { 'Content-Type': 'application/json',

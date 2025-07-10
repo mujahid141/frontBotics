@@ -13,7 +13,8 @@ import {
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { BASE_URL } from "../utils/sharesUtils";
+import { getBaseUrl } from '../utils/sharesUtils';
+
 
 const ChatBox = () => {
   const route = useRoute();
@@ -29,7 +30,7 @@ const ChatBox = () => {
 
   const getMessages = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}community/rooms/${roomId}/messages/`);
+      const response = await axios.get(`${getBaseUrl()}community/rooms/${roomId}/messages/`);
       const sorted = response.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       setMessages(sorted);
       setLoading(false);
@@ -45,7 +46,7 @@ const ChatBox = () => {
     if (!newMessage.trim()) return;
 
     try {
-      await axios.post(`${BASE_URL}community/rooms/${roomId}/messages/`, {
+      await axios.post(`${getBaseUrl()}community/rooms/${roomId}/messages/`, {
         sender: user.pk,
         content: newMessage,
       });

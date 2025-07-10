@@ -1,7 +1,9 @@
 import React, { useState, useRef, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
-import { BASE_URL } from '../utils/sharesUtils'; // Adjust path as needed
+import { getBaseUrl } from '../utils/sharesUtils';
+
+
 import { AuthContext } from '../context/AuthContext';
 
 const Botanic = () => {
@@ -30,7 +32,7 @@ const Botanic = () => {
     setTimeout(async () => {
       try {
         const response = await axios.post(
-          `${BASE_URL}bot/get_answer/`,
+          `${getBaseUrl()}bot/get_answer/`,
           { question: trimmedInput }, // body data
           {
             headers: {

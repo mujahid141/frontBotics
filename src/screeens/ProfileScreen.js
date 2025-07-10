@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { AuthContext } from '../context/AuthContext'; 
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios'; // ✅ Correct import
 
@@ -25,7 +25,7 @@ const ProfileEditScreen = () => {
   const fetchUserDetails = async () => {
     console.log(userToken)
     try {
-      const response = await axios.get(`${BASE_URL}profile/`, {
+      const response = await axios.get(`${getBaseUrl()}profile/`, {
         headers: {
           'Authorization': `Token ${userToken}`,
         }
@@ -45,7 +45,7 @@ const ProfileEditScreen = () => {
   const handleSaveProfile = async () => {
     try {
       const updatedData = { username, bio, location, address };
-      const response = await axios.put(`${BASE_URL}profile/`, updatedData, {
+      const response = await axios.put(`${getBaseUrl()}profile/`, updatedData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${userToken}`,

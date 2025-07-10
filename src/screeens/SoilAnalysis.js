@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, Alert, Image, ActivityIndicat
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
@@ -89,7 +89,7 @@ const analyzeSoil = async (uri) => {
                         });
 
                         const response = await axios.post(
-                            `${BASE_URL}soilanalysis/`,
+                            `${getBaseUrl()}soilanalysis/`,
                             {
                                 inputImage: base64,
                             },

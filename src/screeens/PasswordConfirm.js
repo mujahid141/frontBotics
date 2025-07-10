@@ -3,7 +3,7 @@ import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } fro
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 
 const PasswordConfirm = () => {
     const [email, setEmail] = useState('');
@@ -33,7 +33,7 @@ const PasswordConfirm = () => {
         }
 
         try {
-            const response = await axios.post(`${BASE_URL}profile/password-reset/confirm/`, {
+            const response = await axios.post(`${getBaseUrl()}profile/password-reset/confirm/`, {
                 email,
                 otp:String(otp),
                 new_password: newPassword
