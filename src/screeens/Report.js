@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert ,  Image,} from 'react-native';
 import { AuthContext } from '../context/AuthContext';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import FarmWidget from './FarmWidget';
 import WeatherWidget from './WeatherWidget';
 import SoilAnalysisWidget from './SoilAnalysisWidget';
@@ -40,7 +40,7 @@ const [chatBotData, setChatBotData] = useState(null);
   const fetchPaymentData = async () => {
   try {
     const response = await axios.get(
-      `${BASE_URL}payment/payment-get/`,
+      `${getBaseUrl()}payment/payment-get/`,
       {
         headers: {
           Authorization: `Token ${userToken}`,
@@ -74,7 +74,7 @@ const [chatBotData, setChatBotData] = useState(null);
 
   const fetchFarmData = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}farm/farm-reports/`, {
+      const response = await axios.get(`${getBaseUrl()}farm/farm-reports/`, {
         headers: { Authorization: `Token ${userToken}` },
       });
       if (response.status === 200) {
@@ -91,7 +91,7 @@ const [chatBotData, setChatBotData] = useState(null);
 
   const fetchSoilData = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}report/soil-report`, {
+      const response = await axios.get(`${getBaseUrl()}report/soil-report`, {
         headers: { Authorization: `Token ${userToken}` },
       });
       setSoilData(response.data);
@@ -102,7 +102,7 @@ const [chatBotData, setChatBotData] = useState(null);
 
   const fetchPestData = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}report/leaf-disease-report/`, {
+      const response = await axios.get(`${getBaseUrl()}report/leaf-disease-report/`, {
         headers: { Authorization: `Token ${userToken}` },
       });
       if (response.status === 200) {
@@ -116,7 +116,7 @@ const [chatBotData, setChatBotData] = useState(null);
   };
   const fetchChatBotData = async () => {
         try {
-            const response = await axios.get(`${BASE_URL}report/chatbot-interaction/`, {
+            const response = await axios.get(`${getBaseUrl()}report/chatbot-interaction/`, {
                 headers: { Authorization: `Token ${userToken}` },
             });
             if (response.status === 200) {

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { BASE_URL } from "../utils/sharesUtils"; // Replace with your actual base URL
+import { getBaseUrl } from '../utils/sharesUtils'; // Replace with your actual base URL
 
 const CommunityAndChat = ({ navigation }) => {
   const [rooms, setRooms] = useState([]);
@@ -18,7 +18,7 @@ const CommunityAndChat = ({ navigation }) => {
 
   const getRooms = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}community/rooms/`);
+      const response = await axios.get(`${getBaseUrl}community/rooms/`);
       setRooms(response.data); // Adjust based on the response structure
       setLoading(false);
     } catch (error) {

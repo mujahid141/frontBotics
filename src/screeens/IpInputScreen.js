@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export default function IpInputScreen({ navigation }) {
+import { useNavigation } from '@react-navigation/native';
+export default function IpInputScreen(
+  
+) {
   const [ip, setIp] = useState('');
-
+  const navigation = useNavigation();
   const handleSave = async () => {
     if (!ip) {
       Alert.alert("Missing IP", "Please enter the IP address provided by your admin.");
@@ -12,7 +14,7 @@ export default function IpInputScreen({ navigation }) {
     }
 
     await AsyncStorage.setItem('user_ip', ip);
-    navigation.replace('Login');
+    navigation.navigate('Login');
   };
 
   return (

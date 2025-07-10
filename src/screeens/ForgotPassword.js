@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -20,7 +20,7 @@ const handleResetPassword = async () => {
     }
 
     try {
-        const response = await axios.post(`${BASE_URL}profile/password-reset/request/`, {
+        const response = await axios.post(`${getBaseUrl()}profile/password-reset/request/`, {
              email,
         });
 

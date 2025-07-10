@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, Image, Alert, TouchableOpacity, StyleShe
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 
 const RegisterScreen = () => {
   const { login } = useContext(AuthContext);
@@ -51,7 +51,7 @@ const RegisterScreen = () => {
     setLoading(true); // Set loading to true before making the request
 
     try {
-      const response = await axios.post(`${BASE_URL}auth/registration/`, {
+      const response = await axios.post(`${getBaseUrl()}auth/registration/`, {
         username,
         email,
         password1: password,

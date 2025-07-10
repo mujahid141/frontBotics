@@ -9,8 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
 import { AuthContext } from '../context/AuthContext';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const PaymentConfirm = ({navigation}) => {
   const { userToken } = useContext(AuthContext);
@@ -32,7 +33,7 @@ const PaymentConfirm = ({navigation}) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${BASE_URL}payment/payment-post/`,
+        `${getBaseUrl}payment/payment-post/`,
         {
           transaction_id: transactionId,
           amount: amount,

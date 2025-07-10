@@ -46,18 +46,14 @@ const AppNavigator = () => {
     checkIp();
   }, []);
 
-  if (ipSet === null) return null; // Or show splash
+   // Or show splash
 
-  if (!ipSet) {
-    return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="IpInput" component={IpInputScreen} />
-      </Stack.Navigator>
-    );
-  }
+
   return (
     <Stack.Navigator>
-      {userToken ? (
+      {!ipSet ? (
+          <Stack.Screen name="IpInput" component={IpInputScreen} />
+         ) : userToken ? (
         // Show authenticated screens
         <>
           <Stack.Screen 
