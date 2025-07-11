@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import WeatherSection from './WeatherSection';
 import { AuthContext } from "../context/AuthContext";
-
+import { initBaseUrl } from '../utils/sharesUtils';
 const HomeScreen = ({ navigation }) => {
   // State for pull-to-refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
-
+   // Initialize base URL
   // Function to simulate a refresh
   const onRefresh = () => {
     setIsRefreshing(true);

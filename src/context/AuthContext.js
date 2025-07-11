@@ -59,9 +59,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Fetch the user details on app start if token exists
-    useEffect(() => {
-        loadToken(); // Load token on app start
-    }, []);
+  useEffect(() => {
+    if (userToken) {
+        fetchUserDetails(userToken); // Fetch user details if the token is available
+    }
+}, [userToken]);
 
     // Fetch user details if userToken is updated
     useEffect(() => {

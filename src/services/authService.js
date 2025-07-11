@@ -2,11 +2,16 @@
 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL } from '../utils/sharesUtils';
+import { getBaseUrl } from '../utils/sharesUtils';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 // Axios instance
+
+const baseurl =  getBaseUrl(); 
+console.log('base url',baseurl)
+// Ensure this is set before using the API client
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: baseurl,
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
@@ -46,7 +51,7 @@ export const logout = async () => {
 // Get user profile
 export const getUserDetails = async (token) => {
   try {
-    const response = await axios.get(`${BASE_URL}/auth/user/`, {
+    const response = await axios.get(`${getBaseUrl()}/auth/user/`, {
       headers: {
         Authorization: `Token ${token}`,
       },

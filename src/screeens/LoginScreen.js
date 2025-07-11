@@ -58,6 +58,9 @@ const LoginScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.forgotPassword}>Forgot password? Click here!</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('IpInput')}>
+        <Text style={styles.forgotPassword}>Set Ip Here</Text>
+        </TouchableOpacity>
         </View>
     );
 };

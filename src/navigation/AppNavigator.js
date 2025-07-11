@@ -29,10 +29,9 @@ const Stack = createStackNavigator();
 
 const AppNavigator = () => {
   
-  const { userToken } = useContext(AuthContext); // Check if user is authenticated
+  const { user, userToken } = useContext(AuthContext); // Check if user is authenticated
 
-  const [ipSet, setIpSet] = useState(false); // null = loading, false = not set, true = set
-
+  const [ipSet, setIpSet] = useState(false); 
   useEffect(() => {
     const checkIp = async () => {
       const ip = await AsyncStorage.getItem('user_ip');
@@ -51,11 +50,15 @@ const AppNavigator = () => {
 
   return (
     <Stack.Navigator>
-      {!ipSet ? (
-          <Stack.Screen name="IpInput" component={IpInputScreen} />
-         ) : userToken ? (
-        // Show authenticated screens
+      {userToken ?  (
         <>
+        
+         <Stack.Screen 
+            name="IpInput" 
+            component={IpInputScreen} 
+            options={{ headerShown: false }} 
+          />
+        
           <Stack.Screen 
             name="Home" 
             component={HomeScreen} 
@@ -140,6 +143,7 @@ const AppNavigator = () => {
       ) : (
         // Show unauthenticated screens
         <>
+        
           <Stack.Screen 
             name="Login" 
             component={LoginScreen} 
@@ -163,6 +167,11 @@ const AppNavigator = () => {
           <Stack.Screen 
             name="PasswordConfirm" 
             component={PasswordConfirm} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="IpInput" 
+            component={IpInputScreen} 
             options={{ headerShown: false }} 
           />
         </>

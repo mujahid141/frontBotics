@@ -18,7 +18,7 @@ const CommunityAndChat = ({ navigation }) => {
 
   const getRooms = async () => {
     try {
-      const response = await axios.get(`${getBaseUrl}community/rooms/`);
+      const response = await axios.get(`${getBaseUrl()}community/rooms/`);
       setRooms(response.data); // Adjust based on the response structure
       setLoading(false);
     } catch (error) {
