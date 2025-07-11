@@ -30,6 +30,9 @@ const SettingsScreen = ({navigation}) => {
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HelpAndSupport')}>
                 <Text style={styles.buttonText}>Help & Support</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('IpInput')}>
+                <Text style={styles.buttonText}>Set Ip</Text>
+            </TouchableOpacity>
 
             {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={logout}>

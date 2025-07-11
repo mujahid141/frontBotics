@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { getBaseUrl } from '../utils/sharesUtils';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-import { initBaseUrl } from '../utils/sharesUtils';
+
 export default function IpInputScreen(
   
 ) {

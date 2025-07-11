@@ -1,9 +1,14 @@
 import axios from 'axios';
-import { BASE_URL } from '../utils/sharesUtils'; // Replace with your API base URL
+import { getBaseUrl } from '../utils/sharesUtils';// Replace with your API base URL
 
 export const getUserDetails = async (token) => {
+    const baseurl = getBaseUrl();
+    console.log('Base URL:', baseurl); // Log the base URL for debugging
+    if (baseurl === '' || baseurl === undefined) {
+        throw new Error('Base URL is not set. Please initialize it before making API calls.');
+    }
     try {
-        const response = await axios.get(`${BASE_URL}auth/user/`, {
+        const response = await axios.get(`${baseurl}auth/user/`, {
             headers: {
                 'Authorization': `Token ${token}`,
             },
