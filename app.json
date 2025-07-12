@@ -2,6 +2,7 @@
   "expo": {
     "name": "FarmBotics",
     "slug": "FarmBotics",
+    "owner": "13mujahid",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/custom_icon.png",
@@ -18,12 +19,19 @@
     "android": {
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/FSplash.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.mujahid.farmboics"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,6 +46,18 @@
         }
       ],
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3413b93f-ff03-4afe-8b70-7192dbe88d9f"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3413b93f-ff03-4afe-8b70-7192dbe88d9f"
+    }
   }
 }

@@ -41,14 +41,15 @@
     "react-native-fs": "^2.20.0",
     "react-native-gifted-chat": "^2.8.1",
     "react-native-maps": "1.20.1",
-    "react-native-pdf-lib": "^1.0.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-view-shot": "^4.0.3",
     "react-native-web": "^0.20.0",
-    "rimraf": "^4.0.0"
+    "rimraf": "^4.0.0",
+    "expo-dev-client": "~5.2.4",
+    "expo-updates": "~0.28.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
