@@ -45,6 +45,10 @@ export default function IpInputScreen(
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save & Continue</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+              <Text style={styles.forgotPassword}>Home </Text>
+              </TouchableOpacity>
     </View>
   );
 }

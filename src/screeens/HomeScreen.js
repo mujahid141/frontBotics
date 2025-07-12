@@ -20,9 +20,9 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header with Icons */}
+      
       <View style={styles.header}>
-      {user && <Text style={styles.farmName}>Welcome, {user.username}</Text>}
+        <Text style={styles.farmName}>Welcome to {user.farm_name || 'Your Farm'}</Text>
 
         <View style={styles.iconContainer}>
           <Icon
@@ -49,17 +49,17 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Scrollable content with pull-to-refresh */}
+      
       <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Weather Section */}
+        
         <WeatherSection onPress={() => navigation.navigate('DetailWeather')} />
 
-        {/* Buttons for Soil and Pest Analysis */}
+        
         <View style={styles.analysisContainer}>
           <TouchableOpacity
             style={styles.analysisButton}

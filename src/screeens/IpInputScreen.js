@@ -21,8 +21,8 @@ export default function IpInputScreen(
     initBaseUrl();
     initBaseUrl();
     console.log('IP saved:', getBaseUrl());
-    navigation.navigate('Home');
-    
+    Alert.alert("IP Saved", "The IP address has been saved successfully.");
+    navigation.navigate('Login'); // Navigate to Login screen after saving IP
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, Image, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const WeatherSection = ({ onPress }) => {
+const WeatherSection = ({onPress}) => {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,9 +76,9 @@ const WeatherSection = ({ onPress }) => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Error: {error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={handlePress}>
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.container} onPress={ onPress || handlePress}>
+  <Text style={styles.retryButtonText}>Retry</Text>
+</TouchableOpacity>
       </View>
     );
   }
@@ -86,7 +86,7 @@ const WeatherSection = ({ onPress }) => {
   const { location, current } = weatherData;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress || handlePress}> {/* Ensure the passed onPress is used */}
+    <TouchableOpacity style={styles.container} onPress={onPress || handlePress}> 
       <Text style={styles.header}>Current Weather</Text>
       <Text style={styles.location}>
         {location.name}, {location.region}, {location.country}

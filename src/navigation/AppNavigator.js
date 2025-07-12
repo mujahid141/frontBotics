@@ -33,6 +33,7 @@ const AppNavigator = () => {
 
   const [ipSet, setIpSet] = useState(false); 
   useEffect(() => {
+    console.log("AppNavigator mounted");
     const checkIp = async () => {
       const ip = await AsyncStorage.getItem('user_ip');
       if (ip) {
@@ -50,18 +51,17 @@ const AppNavigator = () => {
 
   return (
     <Stack.Navigator>
-      {userToken ?  (
+      {userToken ?   (
         <>
-        
-         <Stack.Screen 
-            name="IpInput" 
-            component={IpInputScreen} 
-            options={{ headerShown: false }} 
-          />
         
           <Stack.Screen 
             name="Home" 
             component={HomeScreen} 
+            options={{ headerShown: false }} 
+          />
+           <Stack.Screen 
+            name="IpInput" 
+            component={IpInputScreen} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 

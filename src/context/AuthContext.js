@@ -1,84 +1,87 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { loginUser as loginUser } from '../services/authService'; // Import the login function
-import { getUserDetails } from '../services/userService'; // Import the service to fetch user details
+import { loginUser as loginUser } from '../services/authService';
+import { getUserDetails } from '../services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initBaseUrl } from '../utils/sharesUtils'; // <- Make sure this sets the base URL properly
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [userToken, setUserToken] = useState(null);
-    const [user, setUser] = useState(null); // State to store user details
-    const [loading, setLoading] = useState(true); // Loading state for checking token
-    const [userLoading, setUserLoading] = useState(false); // Loading state for user data
+  const [userToken, setUserToken] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Wait for token + baseURL
+  const [userLoading, setUserLoading] = useState(false);
 
-    // Function to login the user
-    const login = async (username, password) => {
-        try {
-          const data = await loginUser(username, password); // Call login from authService
-      
-          if (data && typeof data.key === 'string') {
-            console.log('✅ Received token:', data.key);
-            setUserToken(data.key); // Set the access token
-            await AsyncStorage.setItem('accessToken', data.key); // Store access token
-          } else {
-            console.error('❌ Invalid login response:', data);
-            throw new Error('Login failed: Invalid token format.');
-          }
-        } catch (error) {
-          console.error('Login error:', error);
-          throw new Error('Login failed. Please check your credentials.');
-        }
-      };
-      
-    // Function to logout the user
-    const logout = async () => {
-        await AsyncStorage.removeItem('accessToken'); // Remove access token from AsyncStorage
-        setUserToken(null); // Clear user token
-        setUser(null); // Clear user details
-    };
+  // ✅ Login function
+  const login = async (username, password) => {
+    try {
+      const data = await loginUser(username, password);
+      if (data && typeof data.key === 'string') {
+        console.log('✅ Received token:', data.key);
+        setUserToken(data.key);
+        await AsyncStorage.setItem('accessToken', data.key);
+        await fetchUserDetails(data.key); // ✅ Fetch user after login
+      } else {
+        throw new Error('Login failed: Invalid token format.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw new Error('Login failed. Please check your credentials.');
+    }
+  };
 
-    // Function to load token from AsyncStorage
-    const loadToken = async () => {
-        const token = await AsyncStorage.getItem('accessToken'); // Retrieve access token
-        setUserToken(token); // Set user token state
-        setLoading(false); // Set loading to false after token retrieval
-    };
+  const logout = async () => {
+    await AsyncStorage.removeItem('accessToken');
+    setUserToken(null);
+    setUser(null);
+  };
 
-    // Function to fetch user details using the token
-    const fetchUserDetails = async (token) => {
-        setUserLoading(true); // Start loading user details
-        try {
-            const userDetails = await getUserDetails(token); // Call the service to fetch user details
-            
-            setUser(userDetails); // Set user data in state
-        } catch (error) {
-            console.error('Error fetching user details:', error);
-        } finally {
-            setUserLoading(false); // Stop loading user details
-        }
-    };
+  // ✅ Fetch user profile from token
+  const fetchUserDetails = async (token) => {
+    setUserLoading(true);
+    try {
+      const userDetails = await getUserDetails(token);
+      setUser(userDetails);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setUserLoading(false);
+    }
+  };
 
-    // Fetch the user details on app start if token exists
+  // ✅ On app load: init base URL, get token, and fetch user
   useEffect(() => {
-    if (userToken) {
-        fetchUserDetails(userToken); // Fetch user details if the token is available
-    }
-}, [userToken]);
-
-    // Fetch user details if userToken is updated
-    useEffect(() => {
-        if (userToken) {
-            fetchUserDetails(userToken); // Fetch user details if the token is available
+    const bootstrap = async () => {
+      try {
+        await initBaseUrl(); // Set BASE_URL first
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          setUserToken(token);
+          await fetchUserDetails(token); // Fetch user after setting base URL
         }
-    }, [userToken]);
+      } catch (err) {
+        console.error('❌ Error during init:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    bootstrap();
+  }, []); // ✅ Only run once
 
-    if (loading || userLoading) {
-        return null; // Render nothing or a loader until token and user data are loaded
-    }
+  // ✅ Optional loader UI (to avoid white screen)
+  if (loading || userLoading) {
+    return null;
+    // Or return a spinner:
+    // return (
+    //   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //     <ActivityIndicator size="large" color="#28a745" />
+    //   </View>
+    // );
+  }
 
-    return (
-        <AuthContext.Provider value={{ user, userToken, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{ user, userToken, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
