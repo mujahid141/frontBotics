@@ -4,7 +4,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import WeatherSection from './WeatherSection';
 import { AuthContext } from "../context/AuthContext";
 import { initBaseUrl } from '../utils/sharesUtils';
-const HomeScreen = ({ navigation }) => {
+
+const HomeScreen = ({navigation}) => {
   // State for pull-to-refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
@@ -22,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       
       <View style={styles.header}>
-        <Text style={styles.farmName}>Welcome to {user.farm_name || 'Your Farm'}</Text>
+        <Text style={styles.farmName}>Welcome to {user?.farm_name || 'Your Farm'}</Text>
 
         <View style={styles.iconContainer}>
           <Icon

@@ -5,14 +5,15 @@
     "owner": "13mujahid",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/custom_icon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
-      "image": "./assets/FSplash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -21,14 +22,10 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/FSplash.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.mujahid.farmboics"
@@ -44,20 +41,19 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
-      ],
-      "expo-router"
+      ]
     ],
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3413b93f-ff03-4afe-8b70-7192dbe88d9f"
+        "projectId": "34033f77-5aa3-4efb-879c-81aa9c4942b5"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/3413b93f-ff03-4afe-8b70-7192dbe88d9f"
+      "url": "https://u.expo.dev/c0d20de3-dd25-408c-b550-1e1dadc397ca"
     }
   }
 }
