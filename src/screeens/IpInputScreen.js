@@ -1,28 +1,51 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { getBaseUrl } from '../utils/sharesUtils';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-import { initBaseUrl } from '../utils/sharesUtils';
-export default function IpInputScreen(
-  
-) {
+import { getBaseUrl, initBaseUrl } from '../utils/sharesUtils';
+
+export default function IpInputScreen() {
   const [ip, setIp] = useState('');
   const navigation = useNavigation();
+
+  // ✅ Regex to validate IP format (IPv4)
+  const isValidIP = (ip) =>
+    /^((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.|$)){4}$/.test(ip.trim());
+
   const handleSave = async () => {
     if (!ip) {
-      Alert.alert("Missing IP", "Please enter the IP address provided by your admin.");
+      Alert.alert("Missing IP", "Please enter the IP address.");
       return;
     }
 
-    await AsyncStorage.setItem('user_ip', ip);
-    console.log('IP saved:', ip);
-    initBaseUrl();
-    initBaseUrl();
-    console.log('IP saved:', getBaseUrl());
-    Alert.alert("IP Saved", "The IP address has been saved successfully.");
-    navigation.navigate('Login'); // Navigate to Login screen after saving IP
+    if (!isValidIP(ip)) {
+      Alert.alert("Invalid IP", "Please enter a valid IP address (e.g. 192.168.1.100).");
+      return;
+    }
+
+    try {
+      await AsyncStorage.setItem('user_ip', ip.trim());
+
+      await initBaseUrl(); // Load and store base URL from saved IP
+
+      const baseUrl = await getBaseUrl();
+      if (!baseUrl) {
+        Alert.alert("Error", "Failed to initialize base URL.");
+        return;
+      }
+
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error saving IP:', error);
+      Alert.alert("Error", "Something went wrong while saving the IP.");
+    }
   };
 
   return (
@@ -45,6 +68,8 @@ export default function IpInputScreen(
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save & Continue</Text>
       </TouchableOpacity>
+
+      
     </View>
   );
 }
@@ -81,7 +106,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   button: {
-    backgroundColor: '#28a745', // Green button
+    backgroundColor: '#28a745',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -91,5 +116,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  forgotPassword: {
+    marginTop: 16,
+    color: '#007bff',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });

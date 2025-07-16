@@ -1,29 +1,44 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  ScrollView, RefreshControl, Alert
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import WeatherSection from './WeatherSection';
 import { AuthContext } from "../context/AuthContext";
 import { initBaseUrl } from '../utils/sharesUtils';
 
-const HomeScreen = ({navigation}) => {
-  // State for pull-to-refresh
+const HomeScreen = ({ navigation }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
-   // Initialize base URL
-  // Function to simulate a refresh
+
+  // ✅ Ensure base URL is initialized on first mount
+  useEffect(() => {
+    const setup = async () => {
+      try {
+        await initBaseUrl();
+      } catch (error) {
+        console.error("Base URL initialization failed:", error);
+        Alert.alert("Error", "Failed to initialize base URL.");
+      }
+    };
+    setup();
+  }, []);
+
+  // ✅ Pull-to-refresh logic
   const onRefresh = () => {
     setIsRefreshing(true);
-    // Simulate a network request delay
     setTimeout(() => {
-      setIsRefreshing(false); // Stop refreshing after the simulated delay
-    }, 2000); // 2 seconds refresh time (adjust as needed)
+      setIsRefreshing(false);
+    }, 2000);
   };
 
   return (
     <View style={styles.container}>
-      
       <View style={styles.header}>
-        <Text style={styles.farmName}>Welcome to {user?.farm_name || 'Your Farm'}</Text>
+        <Text style={styles.farmName}>
+          Welcome to {user?.farm_name || 'Your Farm'}
+        </Text>
 
         <View style={styles.iconContainer}>
           <Icon
@@ -50,63 +65,33 @@ const HomeScreen = ({navigation}) => {
         </View>
       </View>
 
-      
       <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        
         <WeatherSection onPress={() => navigation.navigate('DetailWeather')} />
 
-        
         <View style={styles.analysisContainer}>
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('SoilAnalysis')}
-          >
-            <Text style={styles.analysisButtonText}>Soil Health Analysis</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('FarmIdentification')}
-          >
-            <Text style={styles.analysisButtonText}>Identify Farms</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('PestAnalysis')}
-          >
-            <Text style={styles.analysisButtonText}>Pest Analysis</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('CummunityChat')}
-          >
-            <Text style={styles.analysisButtonText}>Community</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('Botanic')}
-          >
-            <Text style={styles.analysisButtonText}>Ask Me ! </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.analysisButton}
-            onPress={() => navigation.navigate('Report')}
-          >
-            <Text style={styles.analysisButtonText}>Analyze your farm  </Text>
-          </TouchableOpacity>
+          <AnalysisButton label="Soil Health Analysis" onPress={() => navigation.navigate('SoilAnalysis')} />
+          <AnalysisButton label="Identify Farms" onPress={() => navigation.navigate('FarmIdentification')} />
+          <AnalysisButton label="Pest Analysis" onPress={() => navigation.navigate('PestAnalysis')} />
+          <AnalysisButton label="Community" onPress={() => navigation.navigate('CummunityChat')} />
+          <AnalysisButton label="Ask Me!" onPress={() => navigation.navigate('Botanic')} />
+          <AnalysisButton label="Analyze your farm" onPress={() => navigation.navigate('Report')} />
         </View>
       </ScrollView>
     </View>
   );
 };
+
+// ✅ Reusable component for buttons
+const AnalysisButton = ({ label, onPress }) => (
+  <TouchableOpacity style={styles.analysisButton} onPress={onPress}>
+    <Text style={styles.analysisButtonText}>{label}</Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -123,6 +108,9 @@ const styles = StyleSheet.create({
   farmName: {
     fontSize: 20,
     fontWeight: 'bold',
+    flex: 1,
+    flexWrap: 'wrap',
+    paddingRight: 10,
   },
   iconContainer: {
     flexDirection: 'row',
@@ -137,6 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    marginTop: 10,
   },
   analysisButton: {
     width: '45%',
@@ -149,7 +138,7 @@ const styles = StyleSheet.create({
   },
   analysisButtonText: {
     fontSize: 16,
-    color: '#ffff',
+    color: '#fff',
     textAlign: 'center',
   },
 });

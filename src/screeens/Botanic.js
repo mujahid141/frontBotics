@@ -1,17 +1,17 @@
 import React, { useState, useRef, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View, Text, TextInput, Button, StyleSheet,
+  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
+} from 'react-native';
 import axios from 'axios';
 import { getBaseUrl } from '../utils/sharesUtils';
-
-
 import { AuthContext } from '../context/AuthContext';
 
 const Botanic = () => {
   const [messages, setMessages] = useState([
     { id: 1, text: 'Hello! How can I assist you with your farm today?', sender: 'Botanic' },
   ]);
-
-  const { user, userToken } = useContext(AuthContext); // ✅ Make sure token is provided in context
+  const { userToken } = useContext(AuthContext);
   const [userInput, setUserInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const scrollViewRef = useRef();
@@ -19,64 +19,73 @@ const Botanic = () => {
   const handleSend = async () => {
     const trimmedInput = userInput.trim();
     if (!trimmedInput || isThinking) return;
-  
+
     const userMessage = { id: Math.random(), text: trimmedInput, sender: 'You' };
     setMessages(prev => [...prev, userMessage]);
     setUserInput('');
     setIsThinking(true);
-  
+
     const thinkingMessage = { id: Math.random(), text: 'Thinking...', sender: 'Botanic', isTemporary: true };
     setMessages(prev => [...prev, thinkingMessage]);
-  
-    // Simulate delay
-    setTimeout(async () => {
-      try {
-        const response = await axios.post(
-          `${getBaseUrl()}bot/get_answer/`,
-          { question: trimmedInput }, // body data
-          {
-            headers: {
-              'Authorization': `Token ${userToken}`,
-            }
-          }
-        );
-  
-        // Remove temporary "thinking" message
-        setMessages(prev => prev.filter(msg => !msg.isTemporary));
-  
-        const botMessage = {
-          id: Math.random(),
-          text: response.data.answer || "Hmm... I couldn't come up with a response.",
-          sender: 'Botanic ',
-        };
-        setMessages(prev => [...prev, botMessage]);
-      } catch (error) {
-        setMessages(prev => prev.filter(msg => !msg.isTemporary));
-  
-        const errorMessage = {
-          id: Math.random(),
-          text: "Sorry, Please ask something related to farming and Agriculture . Please try again later.",
-          sender: 'Botanic',
-        };
-        setMessages(prev => [...prev, errorMessage]);
+
+    try {
+      const baseUrl = await getBaseUrl();
+      if (!baseUrl || baseUrl.trim() === '') {
+        throw new Error('Base URL is not set.');
       }
-  
+
+      const endpoint = `${baseUrl.replace(/\/+$/, '')}/bot/get_answer/`;
+
+      const response = await axios.post(
+        endpoint,
+        { question: trimmedInput },
+        {
+          headers: {
+            Authorization: `Token ${userToken}`,
+          },
+        }
+      );
+
+      // Remove "Thinking..." message
+      setMessages(prev => prev.filter(msg => !msg.isTemporary));
+
+      const botMessage = {
+        id: Math.random(),
+        text: response?.data?.answer || "Hmm... I couldn't come up with a response.",
+        sender: 'Botanic',
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+
+    } catch (error) {
+      // Remove "Thinking..." message
+      setMessages(prev => prev.filter(msg => !msg.isTemporary));
+
+      const errorMessage = {
+        id: Math.random(),
+        text: "⚠️ Sorry, something went wrong. Please try again with a valid farm-related question.",
+        sender: 'Botanic',
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsThinking(false);
-    }, 2000); // 2 second delay
+    }
   };
-  
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
       <Text style={styles.header}>Botanic - AI Farm Assistant</Text>
 
-      <ScrollView 
+      <ScrollView
         style={styles.messagesContainer}
         ref={scrollViewRef}
-        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+        onContentSizeChange={() =>
+          scrollViewRef.current?.scrollToEnd({ animated: true })
+        }
       >
         {messages.map(message => (
           <View

@@ -1,36 +1,54 @@
 import React, { useContext, useState, useEffect } from "react";
-import { StyleSheet, View, Text, Alert, Button } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Alert,
+  Button,
+  ActivityIndicator,
+} from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { AuthContext } from "../context/AuthContext";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAreaOfPolygon } from 'geolib';
-import { getBaseUrl } from '../utils/sharesUtils';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAreaOfPolygon } from "geolib";
+import { getBaseUrl } from "../utils/sharesUtils";
 import axios from "axios";
+
 const FarmIdentification = () => {
-  const { user , userToken} = useContext(AuthContext);
+  const { user, userToken } = useContext(AuthContext);
   const [userLocation, setUserLocation] = useState(null);
   const [startPoint, setStartPoint] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [boundingBox, setBoundingBox] = useState([]);
   const [mapRegion, setMapRegion] = useState(null);
+  const [loadingLocation, setLoadingLocation] = useState(true);
 
   useEffect(() => {
     const getLocationPermission = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location permission is required to use this feature.");
-        return;
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Denied", "Location permission is required.");
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+        const initialRegion = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+
+        setUserLocation(initialRegion);
+        setMapRegion(initialRegion);
+      } catch (error) {
+        console.error("Location error:", error.message);
+        Alert.alert("Error", "Unable to fetch your location.");
+      } finally {
+        setLoadingLocation(false);
       }
-      const location = await Location.getCurrentPositionAsync({});
-      const initialRegion = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      };
-      setUserLocation(initialRegion);
-      setMapRegion(initialRegion);
     };
 
     getLocationPermission();
@@ -39,13 +57,12 @@ const FarmIdentification = () => {
 
   const loadCoordinates = async () => {
     try {
-      const storedCoordinates = await AsyncStorage.getItem("selectedCoordinates");
-      if (storedCoordinates) {
-        const parsedCoordinates = JSON.parse(storedCoordinates);
-        setBoundingBox(parsedCoordinates);
+      const stored = await AsyncStorage.getItem("selectedCoordinates");
+      if (stored) {
+        setBoundingBox(JSON.parse(stored));
       }
     } catch (error) {
-      console.error("Error loading coordinates:", error);
+      console.error("Failed to load saved coordinates:", error.message);
     }
   };
 
@@ -74,7 +91,7 @@ const FarmIdentification = () => {
   const handleDragEnd = () => {
     if (boundingBox.length > 0) {
       setDragging(false);
-      Alert.alert("Selection Complete", "You have selected an area!");
+      Alert.alert("Area Selected", "You’ve selected a region.");
     }
   };
 
@@ -85,63 +102,68 @@ const FarmIdentification = () => {
   };
 
   const handleRegionChange = (region) => {
-    if (!dragging) {
-      setMapRegion(region);
-    }
+    if (!dragging) setMapRegion(region);
   };
 
   const saveCoordinates = async () => {
     try {
       await AsyncStorage.setItem("selectedCoordinates", JSON.stringify(boundingBox));
-      Alert.alert("Area Confirmed", "Your selected area has been saved.");
+      Alert.alert("Success", "Area saved locally.");
     } catch (error) {
-      console.error("Error saving coordinates:", error);
+      Alert.alert("Error", "Failed to save area.");
     }
   };
 
-  const generateFarmReport = () => {
-  if (boundingBox.length === 0) {
-    Alert.alert("No area selected", "Please select an area first.");
-    return;
-  }
+  const generateFarmReport = async () => {
+    if (boundingBox.length === 0) {
+      Alert.alert("No area selected", "Please select an area first.");
+      return;
+    }
 
-  const areaSqMeters = getAreaOfPolygon(boundingBox);
-  const areaHectares = (areaSqMeters / 10000).toFixed(2);
+    try {
+      const baseUrl = await getBaseUrl();
+      if (!baseUrl) throw new Error("Base URL is not available");
 
-  const now = new Date();
-  const selectedAtISO = now.toISOString();
+      const areaSqMeters = getAreaOfPolygon(boundingBox);
+      const areaHectares = (areaSqMeters / 10000).toFixed(2);
+      const selectedAtISO = new Date().toISOString();
 
-  // Round lat/lng to 6 decimal places
-  const roundedLatitude = Number(mapRegion.latitude.toFixed(6));
-  const roundedLongitude = Number(mapRegion.longitude.toFixed(6));
+      const report = {
+        coordinates: boundingBox,
+        estimated_area: `${areaHectares} ha`,
+        selected_at: selectedAtISO,
+        latitude: Number(mapRegion.latitude.toFixed(6)),
+        longitude: Number(mapRegion.longitude.toFixed(6)),
+      };
 
-  const report = {
-    coordinates: boundingBox,
-    estimated_area: `${areaHectares} ha`,
-    selected_at: selectedAtISO,
-    latitude: roundedLatitude,
-    longitude: roundedLongitude
+      Alert.alert("Submitting", `Saving area: ${areaHectares} hectares...`);
+
+      const res = await axios.post(
+        `${baseUrl.replace(/\/+$/, '')}/farm/farm-reports/`,
+        report,
+        {
+          headers: {
+            Authorization: `Token ${userToken}`,
+          },
+        }
+      );
+
+      Alert.alert("✅ Saved", "Your farm data has been stored.");
+      console.log("Farm report response:", res.data);
+    } catch (error) {
+      console.error("Error saving report:", error.message || error);
+      Alert.alert("❌ Error", "Failed to save your farm data. Please try again.");
+    }
   };
-
-  console.log("Farm Report:", report);
-
-  Alert.alert("Farm Report", `Estimated Area: ${areaHectares} hectares`);
-
-  axios.post(`${getBaseUrl()}farm/farm-reports/`, report, {
-    headers: { Authorization: `Token ${userToken}` }
-  })
-  .then(res => console.log("Saved:", res.data))
-  .catch(err => console.error("Error saving:", err.response?.data || err));
-};
-
-
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Farm Selection</Text>
       {user && <Text style={styles.welcome}>Welcome, {user.username}!</Text>}
 
-      {userLocation ? (
+      {loadingLocation ? (
+        <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
+      ) : userLocation ? (
         <>
           <MapView
             style={styles.map}
@@ -164,20 +186,21 @@ const FarmIdentification = () => {
                 strokeWidth={2}
               />
             )}
-            <Marker coordinate={userLocation} title="You are here!" />
+            <Marker coordinate={userLocation} title="You are here" />
           </MapView>
+
           <View style={styles.controls}>
-            <Button title="Reset Selection" onPress={resetSelection} color="#FF6347" />
+            <Button title="Reset" onPress={resetSelection} color="#FF6347" />
             {boundingBox.length > 0 && (
               <>
-                <Button title="Confirm Selection" onPress={saveCoordinates} />
-                <Button title="Save Your Farm DataData" onPress={generateFarmReport} color="#4682B4" />
+                <Button title="Save Area" onPress={saveCoordinates} />
+                <Button title="Generate Farm Report" onPress={generateFarmReport} color="#4682B4" />
               </>
             )}
           </View>
         </>
       ) : (
-        <Text style={styles.loading}>Fetching your location...</Text>
+        <Text style={styles.loading}>Unable to access location.</Text>
       )}
     </View>
   );
@@ -196,7 +219,7 @@ const styles = StyleSheet.create({
   welcome: {
     textAlign: "center",
     fontSize: 16,
-    marginVertical: 5,
+    marginBottom: 5,
   },
   map: {
     flex: 1,
