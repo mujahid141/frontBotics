@@ -40,9 +40,8 @@ export default function IpInputScreen() {
         Alert.alert("Error", "Failed to initialize base URL.");
         return;
       }
-
-      navigation.navigate('Login'); // Navigate to Login screen after saving IP
       Alert.alert("Success", "IP address saved successfully.");
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Error saving IP:', error);
       Alert.alert("Error", "Something went wrong while saving the IP.");

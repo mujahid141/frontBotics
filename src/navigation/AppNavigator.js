@@ -20,6 +20,7 @@ import DetailsWeather from "../screeens/DetailsWeather";
 import Botanic from "../screeens/Botanic";
 import Report from "../screeens/Report";
 import IpInputScreen from "../screeens/IpInputScreen";
+import IpInputScreenLoggedIn from "../screeens/IpInputScreenLoggedIn";
 import PaymentScreen from "../screeens/PaymentScreen";
 import PaymentConfirm from "../screeens/PaymentConfirm";
 import PasswordConfirm from "../screeens/PasswordConfirm";
@@ -60,8 +61,8 @@ const AppNavigator = () => {
             options={{ headerShown: false }} 
           />
            <Stack.Screen 
-            name="IpInput" 
-            component={IpInputScreen} 
+            name="IpInputLoggedIn" 
+            component={IpInputScreenLoggedIn} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
