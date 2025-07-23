@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 let BASE_URL = ''; // Will be set at runtime
 
 export const setBaseUrl = (ip) => {
-  BASE_URL = `http://${ip}:8000/api/`;
+  BASE_URL = `https://${ip}:8000/api/`;
 };
 
 export const getBaseUrl = () => BASE_URL;
