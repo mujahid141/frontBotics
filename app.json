@@ -15,7 +15,10 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "AIzaSyCHrmyVj9KviyyaZ3NgROgaVHied81kzVI"
+      }
     },
     "android": {
       "permissions": [
@@ -28,14 +31,19 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.mujahid.farmboics"
+      "package": "com.mujahid.farmboics",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCHrmyVj9KviyyaZ3NgROgaVHied81kzVI"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "config": {
-        "cleartextTraffic": true
-      },
+      "cleartextTraffic": true
+    },
     "plugins": [
       [
         "expo-camera",
