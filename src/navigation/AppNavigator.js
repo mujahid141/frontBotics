@@ -52,7 +52,7 @@ const AppNavigator = () => {
 
   return (
     <Stack.Navigator>
-      {!userToken ?   (
+      {userToken ?   (
         <>
         
           <Stack.Screen 
