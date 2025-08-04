@@ -16,11 +16,10 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { getBaseUrl } from '../utils/sharesUtils';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const RegisterScreen = () => {
-  const { login } = useContext(AuthContext);
   const navigation = useNavigation();
-
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -65,7 +64,7 @@ const RegisterScreen = () => {
         password2: confirmPassword,
       });
 
-      if (response.status === 204 || response.status === 200) {
+      if (response.status === 200 || response.status === 204) {
         Alert.alert('Success', 'Registration successful! Please verify your email before logging in.');
         navigation.navigate('Login');
       } else {
@@ -96,46 +95,62 @@ const RegisterScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Create Your Account</Text>
-
         <Image source={require('../../assets/Reg.png')} style={styles.logo} />
+        <Text style={styles.title}>Create Your Account</Text>
+        <Text style={styles.subText}>Join us and manage your farm smarter with AI tools.</Text>
 
-        <TextInput
-          placeholder="Username (letters & numbers)"
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          autoCapitalize="none"
-          placeholderTextColor="#888"
-        />
+        {/* Username */}
+        <View style={styles.inputContainer}>
+          <Icon name="person-outline" size={20} color="#666" style={styles.icon} />
+          <TextInput
+            placeholder="Username (letters & numbers)"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            autoCapitalize="none"
+            placeholderTextColor="#888"
+          />
+        </View>
 
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          style={styles.input}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#888"
-        />
+        {/* Email */}
+        <View style={styles.inputContainer}>
+          <Icon name="mail-outline" size={20} color="#666" style={styles.icon} />
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#888"
+          />
+        </View>
 
-        <TextInput
-          placeholder="Password (min 8 characters)"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#888"
-        />
+        {/* Password */}
+        <View style={styles.inputContainer}>
+          <Icon name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+          <TextInput
+            placeholder="Password (min 8 characters)"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.input}
+            placeholderTextColor="#888"
+          />
+        </View>
 
-        <TextInput
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#888"
-        />
+        {/* Confirm Password */}
+        <View style={styles.inputContainer}>
+          <Icon name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+          <TextInput
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            style={styles.input}
+            placeholderTextColor="#888"
+          />
+        </View>
 
         {loading ? (
           <ActivityIndicator size="large" color="#72bf6a" style={{ marginTop: 20 }} />
@@ -146,7 +161,9 @@ const RegisterScreen = () => {
         )}
 
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.signInText}>Already have an account? Sign In</Text>
+          <Text style={styles.signInText}>
+            Already have an account? <Text style={{ color: '#44923c', fontWeight: '600' }}>Sign In</Text>
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -160,30 +177,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 50,
   },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 15,
+    resizeMode: 'contain',
+  },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#44923c',
-    marginBottom: 20,
+    color: '#2E7D32',
+    marginBottom: 5,
     textAlign: 'center',
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 30,
-    resizeMode: 'contain',
+  subText: {
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 25,
+    textAlign: 'center',
   },
-  input: {
+  inputContainer: {
     width: '90%',
     height: 50,
     backgroundColor: '#fff',
     borderRadius: 10,
     borderColor: '#ddd',
     borderWidth: 1,
-    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
     marginBottom: 15,
+  },
+  icon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
     color: '#333',
-    fontSize: 16,
+    fontSize: 15,
   },
   button: {
     width: '90%',
@@ -196,7 +227,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
   },
   signInText: {

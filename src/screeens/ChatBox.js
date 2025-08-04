@@ -9,12 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  ImageBackground
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { getBaseUrl } from '../utils/sharesUtils';
-
+import { getBaseUrl } from "../utils/sharesUtils";
+import { Ionicons } from "@expo/vector-icons"; // for send icon
 
 const ChatBox = () => {
   const route = useRoute();
@@ -23,7 +24,6 @@ const ChatBox = () => {
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const flatListRef = useRef();
@@ -33,11 +33,9 @@ const ChatBox = () => {
       const response = await axios.get(`${getBaseUrl()}community/rooms/${roomId}/messages/`);
       const sorted = response.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       setMessages(sorted);
-      setLoading(false);
       setRefreshing(false);
     } catch (error) {
       console.error("Fetch messages error:", error);
-      setLoading(false);
       setRefreshing(false);
     }
   };
@@ -81,7 +79,6 @@ const ChatBox = () => {
 
   const renderItem = ({ item }) => {
     const isUser = isCurrentUser(item.sender);
-    const senderName = isUser ? "You"   : " ananomys ";
 
     return (
       <View
@@ -90,7 +87,9 @@ const ChatBox = () => {
           isUser ? styles.userBubble : styles.botBubble,
         ]}
       >
-        <Text style={styles.senderName}>{item.sender}</Text>
+        <Text style={styles.senderName}>
+          {isUser ? "You" : item.sender.substring(0, 10)} {/* Show first 10 chars of sender name */}
+        </Text>
         <Text style={styles.messageText}>{item.content}</Text>
         <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
       </View>
@@ -98,40 +97,49 @@ const ChatBox = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <ImageBackground
+      source={require("../../assets/chat.jpeg")}
+      style={{ flex: 1 }}
+      imageStyle={{ opacity: 0.25 }}
     >
-      <Text style={styles.header}>🌿 Cummunity Chat</Text>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        inverted
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={80}
+      >
+        <Text style={styles.header}>🌾 Community Chat</Text>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          value={newMessage}
-          onChangeText={setNewMessage}
-          onSubmitEditing={sendMessage}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          inverted
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={{ paddingBottom: 10 }}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            value={newMessage}
+            onChangeText={setNewMessage}
+            onSubmitEditing={sendMessage}
+            placeholderTextColor="#777"
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <Ionicons name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eafaf1",
     padding: 10,
   },
   header: {
@@ -139,32 +147,39 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 10,
-    color: "#2d6a4f",
+    color: "#2e7d32",
   },
   messageBubble: {
-    padding: 10,
-    borderRadius: 12,
+    padding: 12,
+    borderRadius: 20,
     marginVertical: 5,
     maxWidth: "75%",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#c7f9cc",
+    backgroundColor: "#c8e6c9",
   },
   botBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#b7e4c7",
+    backgroundColor: "#fff8e1",
   },
   senderName: {
     fontWeight: "bold",
     marginBottom: 3,
+    fontSize: 12,
+    color: "#666",
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 15,
+    color: "#333",
   },
   timestamp: {
     fontSize: 10,
-    color: "#555",
+    color: "#999",
     marginTop: 4,
     textAlign: "right",
   },
@@ -173,29 +188,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: "#ccc",
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 5,
     backgroundColor: "#fff",
+    borderRadius: 30,
+    marginHorizontal: 5,
+    marginBottom: Platform.OS === "ios" ? 10 : 25,
   },
   input: {
     flex: 1,
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 20,
+    paddingVertical: 8,
     paddingHorizontal: 15,
-    backgroundColor: "#fff",
+    fontSize: 15,
+    color: "#333",
   },
   sendButton: {
-    marginLeft: 10,
-    backgroundColor: "#2d6a4f",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  sendButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 5,
+    elevation: 2,
   },
 });
 

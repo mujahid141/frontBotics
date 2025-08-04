@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ScrollView,
   Platform
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
@@ -20,6 +21,8 @@ const isValidEmail = (email) =>
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const { login } = useContext(AuthContext);
   const navigation = useNavigation();
 
@@ -48,13 +51,19 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
-    >
-      <Text style={styles.title}>Welcome Back!</Text>
+   <ScrollView
+  contentContainerStyle={{ flexGrow: 1 }}
+  keyboardShouldPersistTaps="handled"
+>
+  
+    <KeyboardAvoidingView 
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+  style={styles.container}
+>
 
       <Image source={require('../../assets/logo.png')} style={styles.logo} />
+      <Text style={styles.title}>Welcome Back!</Text>
+      <Text style={styles.subtitle}>Login to continue to your farm</Text>
 
       <TextInput
         style={styles.input}
@@ -65,36 +74,76 @@ const LoginScreen = () => {
         keyboardType="email-address"
         placeholderTextColor="#aaa"
       />
+<View style={styles.passwordContainer}>
+  <TextInput
+    style={styles.passwordInput}
+    placeholder="Enter Password"
+    secureTextEntry={!showPassword}
+    value={password}
+    onChangeText={setPassword}
+    placeholderTextColor="#aaa"
+  />
+  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <Text style={styles.toggleText}>
+      {showPassword ? 'Hide' : 'Show'}
+    </Text>
+  </TouchableOpacity>
+</View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        placeholderTextColor="#aaa"
-      />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.8}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-        <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+        <Text style={styles.link}>Forgot password?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-        <Text style={styles.forgotPassword}>Forgot password? Click here!</Text>
-      </TouchableOpacity>
+      <View style={styles.footerLinks}>
+        <Text style={styles.footerText}>Don't have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+          <Text style={[styles.link, styles.signupLink]}> Sign Up</Text>
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity onPress={() => navigation.navigate('IpInput')}>
-        <Text style={styles.forgotPassword}>Set IP Address</Text>
+        <Text style={styles.linkSmall}>Set IP Address</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  passwordContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  borderColor: '#ddd',
+  borderWidth: 1,
+  paddingHorizontal: 10,
+  marginBottom: 15,
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  width: '100%',
+  height: 50,
+  marginTop: 10,
+  justifyContent: 'space-between',
+},
+passwordInput: {
+  flex: 1,
+  height: 50,
+  color: '#333',
+},
+toggleText: {
+  color: '#1b5e20',
+  fontWeight: 'bold',
+  paddingHorizontal: 8,
+},
+
   container: {
     flex: 1,
     backgroundColor: '#f7f9fc',
@@ -102,55 +151,80 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  logo: {
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
+    borderRadius: 70,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#44923c',
+    color: '#2e7d32',
     textAlign: 'center',
-    marginBottom: 20,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: 'contain',
-    borderRadius: 60,
-    marginBottom: 30,
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 25,
+    textAlign: 'center',
   },
   input: {
     height: 50,
     width: '100%',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     borderColor: '#ddd',
     borderWidth: 1,
     paddingHorizontal: 15,
     marginBottom: 15,
     color: '#333',
+    elevation: 2,
   },
   button: {
     width: '100%',
-    backgroundColor: '#72bf6a',
+    backgroundColor: '#43a047',
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  signupText: {
+  link: {
     textAlign: 'center',
-    color: '#6200ea',
+    color: '#1b5e20',
     fontSize: 16,
-    marginBottom: 10,
+    marginTop: 5,
   },
-  forgotPassword: {
+  signupLink: {
+    fontWeight: 'bold',
+  },
+  linkSmall: {
     textAlign: 'center',
-    color: '#6200ea',
+    color: '#1b5e20',
+    fontSize: 14,
+    marginTop: 15,
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    marginTop: 20,
+  },
+  footerText: {
     fontSize: 16,
-    paddingTop: 5,
+    color: '#555',
   },
 });
 

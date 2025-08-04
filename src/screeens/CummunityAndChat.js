@@ -6,10 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground
 } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { getBaseUrl } from '../utils/sharesUtils'; // Replace with your actual base URL
+import { getBaseUrl } from "../utils/sharesUtils";
 
 const CommunityAndChat = ({ navigation }) => {
   const [rooms, setRooms] = useState([]);
@@ -19,7 +20,7 @@ const CommunityAndChat = ({ navigation }) => {
   const getRooms = async () => {
     try {
       const response = await axios.get(`${getBaseUrl()}community/rooms/`);
-      setRooms(response.data); // Adjust based on the response structure
+      setRooms(response.data);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching rooms:", error);
@@ -32,67 +33,79 @@ const CommunityAndChat = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Community and Chat</Text>
-      {user && <Text style={styles.welcome}>Welcome, {user.username}!</Text>}
-      {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" />
-      ) : rooms.length > 0 ? (
-        <FlatList
-          data={rooms}
-          keyExtractor={(item) => item.id.toString()} // Assuming each room has a unique `id`
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.roomItem}
-              onPress={() => navigation.navigate("ChatBox", { roomId: item.id })}
-            >
-              <Text style={styles.roomName}>{item.name}</Text>
-              <Text style={styles.roomDescription}>
-                {item.description || "Join the conversation!"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      ) : (
-        <Text style={styles.noRoomsText}>No rooms available.</Text>
-      )}
-    </View>
+    <ImageBackground
+      source={require("../../assets/chat.jpeg")} // same soft background as Botanic
+      style={styles.background}
+      imageStyle={{ opacity: 0.20 }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.header}>🌾 Community and Chat</Text>
+        {user && <Text style={styles.welcome}>Welcome, {user.username}!</Text>}
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
+        ) : rooms.length > 0 ? (
+          <FlatList
+            data={rooms}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.roomCard}
+                onPress={() => navigation.navigate("ChatBox", { roomId: item.id })}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.roomName}>{item.name}</Text>
+                <Text style={styles.roomDescription}>
+                  {item.description || "Join the conversation!"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          <Text style={styles.noRoomsText}>No rooms available.</Text>
+        )}
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F9",
     padding: 20,
   },
   header: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    color: "#007AFF",
-    marginBottom: 20,
+    color: "#2e7d32", // Green theme
     textAlign: "center",
+    marginBottom: 10,
   },
   welcome: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#555",
-    marginBottom: 10,
     textAlign: "center",
+    marginBottom: 15,
   },
-  roomItem: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+  roomCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 15,
     padding: 15,
-    marginVertical: 10,
+    marginVertical: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderLeftWidth: 5,
+    borderLeftColor: "#4CAF50", // Accent border
   },
   roomName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: "#2e7d32",
   },
   roomDescription: {
     fontSize: 14,
@@ -108,4 +121,3 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityAndChat;
-  

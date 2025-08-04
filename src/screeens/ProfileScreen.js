@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { getBaseUrl } from '../utils/sharesUtils';
@@ -78,80 +79,93 @@ const ProfileEditScreen = () => {
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#4CAF50" />
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <ImageBackground
+      source={require('../../assets/chat.jpeg')}
+      style={{ flex: 1 }}
+      imageStyle={{ opacity: 0.20 }}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>Your Profile</Text>
-          <TouchableOpacity onPress={() => setIsEditing(!isEditing)} style={styles.editButton}>
-            <MaterialIcons name={isEditing ? 'close' : 'edit'} size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {isEditing ? (
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Bio"
-              value={bio}
-              onChangeText={setBio}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Location"
-              value={location}
-              onChangeText={setLocation}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-              <Text style={styles.saveButtonText}>Save Profile</Text>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Your Profile</Text>
+            <TouchableOpacity
+              onPress={() => setIsEditing(!isEditing)}
+              style={styles.editButton}
+            >
+              <MaterialIcons
+                name={isEditing ? 'close' : 'edit'}
+                size={22}
+                color="#fff"
+              />
             </TouchableOpacity>
           </View>
-        ) : (
-          <View style={styles.detailsBox}>
-            <Text style={styles.detailLabel}>
-              Email: <Text style={styles.detailValue}>{user?.email}</Text>
-            </Text>
-            <Text style={styles.detailLabel}>
-              Username: <Text style={styles.detailValue}>{userDetails?.username || '—'}</Text>
-            </Text>
-            <Text style={styles.detailLabel}>
-              Address: <Text style={styles.detailValue}>{userDetails?.address || '—'}</Text>
-            </Text>
-            <Text style={styles.detailLabel}>
-              Location: <Text style={styles.detailValue}>{userDetails?.location || '—'}</Text>
-            </Text>
-            <Text style={styles.detailLabel}>
-              Bio: <Text style={styles.detailValue}>{userDetails?.bio || '—'}</Text>
-            </Text>
-          </View>
-        )}
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          {isEditing ? (
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Bio"
+                value={bio}
+                onChangeText={setBio}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Location"
+                value={location}
+                onChangeText={setLocation}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Address"
+                value={address}
+                onChangeText={setAddress}
+              />
+              <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+                <Text style={styles.saveButtonText}>Save Profile</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.detailsBox}>
+              <Text style={styles.detailLabel}>
+                Email: <Text style={styles.detailValue}>{user?.email}</Text>
+              </Text>
+              <Text style={styles.detailLabel}>
+                Username: <Text style={styles.detailValue}>{userDetails?.username || '—'}</Text>
+              </Text>
+              <Text style={styles.detailLabel}>
+                Address: <Text style={styles.detailValue}>{userDetails?.address || '—'}</Text>
+              </Text>
+              <Text style={styles.detailLabel}>
+                Location: <Text style={styles.detailValue}>{userDetails?.location || '—'}</Text>
+              </Text>
+              <Text style={styles.detailLabel}>
+                Bio: <Text style={styles.detailValue}>{userDetails?.bio || '—'}</Text>
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f9fc' },
+  container: { flex: 1 },
   scrollContent: { padding: 20 },
   loaderContainer: {
     flex: 1,
@@ -164,16 +178,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#333' },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#2e7d32' },
   editButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4CAF50',
     padding: 8,
     borderRadius: 20,
+    elevation: 2,
   },
-  form: {},
+  form: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    elevation: 1,
+  },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
     backgroundColor: '#fff',
     padding: 12,
     marginBottom: 12,
@@ -181,11 +201,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#4CAF50',
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: 25,
     alignItems: 'center',
     marginTop: 10,
+    elevation: 2,
   },
   saveButtonText: {
     color: '#fff',
@@ -196,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 16,
     borderRadius: 10,
-    elevation: 1,
+    elevation: 2,
   },
   detailLabel: {
     fontWeight: 'bold',

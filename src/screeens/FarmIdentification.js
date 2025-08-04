@@ -4,7 +4,7 @@ import {
   View,
   Text,
   Alert,
-  Button,
+  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAreaOfPolygon } from "geolib";
 import { getBaseUrl } from "../utils/sharesUtils";
 import axios from "axios";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const FarmIdentification = () => {
   const { user, userToken } = useContext(AuthContext);
@@ -23,6 +24,7 @@ const FarmIdentification = () => {
   const [boundingBox, setBoundingBox] = useState([]);
   const [mapRegion, setMapRegion] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
+  const [areaHectares, setAreaHectares] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -51,7 +53,7 @@ const FarmIdentification = () => {
       setMapRegion(region);
     } catch (err) {
       Alert.alert("Location Error", "Failed to fetch location.");
-      if (__DEV__) console.error("Location error:", err);
+      console.error(err);
     } finally {
       setLoadingLocation(false);
     }
@@ -65,7 +67,7 @@ const FarmIdentification = () => {
         if (Array.isArray(parsed)) setBoundingBox(parsed);
       }
     } catch (err) {
-      if (__DEV__) console.error("Error loading coordinates:", err);
+      console.error("Error loading coordinates:", err);
     }
   };
 
@@ -74,6 +76,7 @@ const FarmIdentification = () => {
       const { latitude, longitude } = event.nativeEvent.coordinate;
       setStartPoint({ latitude, longitude });
       setBoundingBox([]);
+      setAreaHectares(null);
     }
   };
 
@@ -88,31 +91,34 @@ const FarmIdentification = () => {
         { latitude, longitude: startPoint.longitude },
       ];
       setBoundingBox(box);
+
+      const areaSqMeters = getAreaOfPolygon(box);
+      setAreaHectares((areaSqMeters / 10000).toFixed(2));
     }
   };
 
   const handleDragEnd = () => {
     if (boundingBox.length === 4) {
       setDragging(false);
-      Alert.alert("Area Selected", "You've selected your farm area.");
     }
   };
 
   const resetSelection = () => {
     setStartPoint(null);
     setBoundingBox([]);
+    setAreaHectares(null);
     setDragging(false);
   };
 
   const saveCoordinates = async () => {
+    if (boundingBox.length !== 4) {
+      Alert.alert("Invalid Area", "Please select a rectangular area.");
+      return;
+    }
     try {
-      if (boundingBox.length === 4) {
-        await AsyncStorage.setItem("selectedCoordinates", JSON.stringify(boundingBox));
-        Alert.alert("Saved", "Coordinates stored locally.");
-      } else {
-        Alert.alert("Invalid Area", "Please select a rectangular area.");
-      }
-    } catch (err) {
+      await AsyncStorage.setItem("selectedCoordinates", JSON.stringify(boundingBox));
+      Alert.alert("Saved", "Coordinates stored locally.");
+    } catch {
       Alert.alert("Error", "Failed to save area.");
     }
   };
@@ -125,11 +131,6 @@ const FarmIdentification = () => {
 
     try {
       const baseUrl = await getBaseUrl();
-      if (!baseUrl) throw new Error("Base URL is missing.");
-
-      const areaSqMeters = getAreaOfPolygon(boundingBox);
-      const areaHectares = (areaSqMeters / 10000).toFixed(2);
-
       const report = {
         coordinates: boundingBox,
         estimated_area: `${areaHectares} ha`,
@@ -140,26 +141,23 @@ const FarmIdentification = () => {
 
       Alert.alert("Submitting", `Sending area: ${areaHectares} hectares...`);
 
-      const res = await axios.post(
-        `${baseUrl.replace(/\/+$/, "")}/farm/farm-reports/`,
-        report,
-        {
-          headers: { Authorization: `Token ${userToken}` },
-        }
-      );
+      await axios.post(`${baseUrl}farm/farm-reports/`, report, {
+        headers: { Authorization: `Token ${userToken}` },
+      });
 
       Alert.alert("Success", "Farm report submitted.");
-      if (__DEV__) console.log("Response:", res.data);
     } catch (err) {
-      if (__DEV__) console.error("Submit error:", err);
+      console.error("Submit error:", err);
       Alert.alert("Error", "Could not submit farm data.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Farm Selection</Text>
-      {user && <Text style={styles.welcome}>Welcome, {user.username}!</Text>}
+      <Text style={styles.title}>Farm Area Selection</Text>
+      <Text style={styles.instructions}>
+        Tap to set a starting point, then drag to create a rectangular farm area.
+      </Text>
 
       {loadingLocation ? (
         <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
@@ -181,20 +179,37 @@ const FarmIdentification = () => {
             {boundingBox.length === 4 && (
               <Polygon
                 coordinates={boundingBox}
-                strokeColor="#FF0000"
-                fillColor="rgba(255, 0, 0, 0.2)"
+                strokeColor="#4CAF50"
+                fillColor="rgba(76, 175, 80, 0.3)"
                 strokeWidth={2}
               />
             )}
             <Marker coordinate={userLocation} title="You are here" />
           </MapView>
 
+          {areaHectares && (
+            <View style={styles.areaInfo}>
+              <Text style={styles.areaText}>Estimated Area: {areaHectares} ha</Text>
+            </View>
+          )}
+
           <View style={styles.controls}>
-            <Button title="Reset" onPress={resetSelection} color="#FF6347" />
+            <TouchableOpacity style={[styles.button, styles.resetBtn]} onPress={resetSelection}>
+              <MaterialIcons name="refresh" size={20} color="#fff" />
+              <Text style={styles.btnText}>Reset</Text>
+            </TouchableOpacity>
+
             {boundingBox.length === 4 && (
               <>
-                <Button title="Save Area" onPress={saveCoordinates} />
-                <Button title="Generate Farm Report" onPress={generateFarmReport} color="#4682B4" />
+                <TouchableOpacity style={styles.button} onPress={saveCoordinates}>
+                  <MaterialIcons name="save" size={20} color="#fff" />
+                  <Text style={styles.btnText}>Save</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.button, styles.submitBtn]} onPress={generateFarmReport}>
+                  <MaterialIcons name="check" size={20} color="#fff" />
+                  <Text style={styles.btnText}>Generate Report</Text>
+                </TouchableOpacity>
               </>
             )}
           </View>
@@ -207,36 +222,47 @@ const FarmIdentification = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: "#f7f9fc" },
   title: {
     textAlign: "center",
-    fontSize: 20,
-    marginVertical: 10,
-    fontWeight: "bold",
-  },
-  welcome: {
-    textAlign: "center",
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  map: {
-    flex: 1,
+    fontSize: 22,
     marginTop: 10,
+    fontWeight: "bold",
+    color: "#2e7d32",
   },
-  loading: {
+  instructions: {
     textAlign: "center",
-    fontSize: 16,
-    marginVertical: 20,
+    fontSize: 14,
+    marginBottom: 8,
+    color: "#555",
+    paddingHorizontal: 10,
   },
+  map: { flex: 1 },
+  areaInfo: {
+    backgroundColor: "#fff",
+    padding: 8,
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+  },
+  areaText: { fontSize: 16, fontWeight: "600", color: "#333" },
   controls: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginVertical: 10,
-    flexWrap: "wrap",
-    gap: 10,
+    paddingVertical: 10,
+    backgroundColor: "#f1f8e9",
   },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4CAF50",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  submitBtn: { backgroundColor: "#2e7d32" },
+  resetBtn: { backgroundColor: "#e53935" },
+  btnText: { color: "#fff", marginLeft: 5, fontWeight: "600" },
 });
 
 export default FarmIdentification;

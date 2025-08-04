@@ -1,9 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, RefreshControl, Alert
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+  Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import WeatherSection from './WeatherSection';
 import { AuthContext } from "../context/AuthContext";
 import { initBaseUrl } from '../utils/sharesUtils';
@@ -12,7 +18,6 @@ const HomeScreen = ({ navigation }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
 
-  // ✅ Ensure base URL is initialized on first mount
   useEffect(() => {
     const setup = async () => {
       try {
@@ -25,7 +30,6 @@ const HomeScreen = ({ navigation }) => {
     setup();
   }, []);
 
-  // ✅ Pull-to-refresh logic
   const onRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => {
@@ -35,60 +39,89 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.farmName}>
-          Welcome to {user?.farm_name || 'Your Farm'}
+          Welcome to <Text style={styles.highlight}>{user?.farm_name || 'Your Farm'}</Text>
         </Text>
 
         <View style={styles.iconContainer}>
           <Icon
             name="user"
-            size={24}
-            color="gray"
+            size={22}
+            color="#4CAF50"
             style={styles.icon}
             onPress={() => navigation.navigate('Profile')}
           />
           <Icon
             name="bell"
-            size={24}
-            color="green"
+            size={22}
+            color="#4CAF50"
             style={styles.icon}
             onPress={() => navigation.navigate('Notification')}
           />
           <Icon
             name="cog"
-            size={24}
-            color="green"
+            size={22}
+            color="#4CAF50"
             style={styles.icon}
             onPress={() => navigation.navigate('Settings')}
           />
         </View>
       </View>
 
+      {/* Scroll Content */}
       <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Weather Widget */}
         <WeatherSection onPress={() => navigation.navigate('DetailWeather')} />
 
+        {/* Analysis Buttons */}
         <View style={styles.analysisContainer}>
-          <AnalysisButton label="Soil Health Analysis" onPress={() => navigation.navigate('SoilAnalysis')} />
-          <AnalysisButton label="Identify Farms" onPress={() => navigation.navigate('FarmIdentification')} />
-          <AnalysisButton label="Pest Analysis" onPress={() => navigation.navigate('PestAnalysis')} />
-          <AnalysisButton label="Community" onPress={() => navigation.navigate('CummunityChat')} />
-          <AnalysisButton label="Ask Me!" onPress={() => navigation.navigate('Botanic')} />
-          <AnalysisButton label="Analyze your farm" onPress={() => navigation.navigate('Report')} />
+          <AnalysisButton
+            label="Soil Health Analysis"
+            icon={<FontAwesome5 name="leaf" size={20} color="#2e7d32" />}
+            onPress={() => navigation.navigate('SoilAnalysis')}
+          />
+          <AnalysisButton
+            label="Identify Farms"
+            icon={<MaterialIcons name="map" size={22} color="#2e7d32" />}
+            onPress={() => navigation.navigate('FarmIdentification')}
+          />
+          <AnalysisButton
+            label="Pest Analysis"
+            icon={<FontAwesome5 name="bug" size={20} color="#2e7d32" />}
+            onPress={() => navigation.navigate('PestAnalysis')}
+          />
+          <AnalysisButton
+            label="Community"
+            icon={<FontAwesome5 name="users" size={20} color="#2e7d32" />}
+            onPress={() => navigation.navigate('CummunityChat')}
+          />
+          <AnalysisButton
+            label="Ask Me!"
+            icon={<FontAwesome5 name="robot" size={20} color="#2e7d32" />}
+            onPress={() => navigation.navigate('Botanic')}
+          />
+          <AnalysisButton
+            label="Analyze your farm"
+            icon={<MaterialIcons name="analytics" size={22} color="#2e7d32" />}
+            onPress={() => navigation.navigate('Report')}
+          />
         </View>
       </ScrollView>
     </View>
   );
 };
 
-// ✅ Reusable component for buttons
-const AnalysisButton = ({ label, onPress }) => (
+// Reusable Button Component
+const AnalysisButton = ({ label, icon, onPress }) => (
   <TouchableOpacity style={styles.analysisButton} onPress={onPress}>
+    {icon}
     <Text style={styles.analysisButtonText}>{label}</Text>
   </TouchableOpacity>
 );
@@ -104,19 +137,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 12,
   },
   farmName: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     flex: 1,
     flexWrap: 'wrap',
     paddingRight: 10,
+    color: '#333',
+  },
+  highlight: {
+    color: '#2e7d32',
+    fontWeight: 'bold',
   },
   iconContainer: {
     flexDirection: 'row',
   },
   icon: {
-    marginHorizontal: 8,
+    marginHorizontal: 6,
   },
   scrollView: {
     flex: 1,
@@ -124,22 +163,29 @@ const styles = StyleSheet.create({
   analysisContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    marginTop: 10,
+    justifyContent: 'space-between',
+    marginTop: 14,
   },
   analysisButton: {
-    width: '45%',
-    height: 100,
-    backgroundColor: 'green',
-    borderRadius: 8,
-    justifyContent: 'center',
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
     alignItems: 'center',
-    marginVertical: 8,
   },
   analysisButtonText: {
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 14,
+    color: '#333',
+    marginTop: 8,
     textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

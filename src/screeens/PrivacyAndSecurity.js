@@ -1,103 +1,117 @@
 import React, { useContext } from "react";
-import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { AuthContext } from "../context/AuthContext";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const PrivacyAndSecurity = () => {
     const { user } = useContext(AuthContext);
 
+    const OptionButton = ({ icon, label, color, onPress }) => (
+        <TouchableOpacity style={[styles.optionButton, { backgroundColor: color }]} onPress={onPress} activeOpacity={0.8}>
+            <Icon name={icon} size={24} color="#fff" style={styles.optionIcon} />
+            <Text style={styles.optionText}>{label}</Text>
+        </TouchableOpacity>
+    );
+
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Image 
-                source={require("../../assets/security.svg")} 
+                source={require("../../assets/security.svg")} // ✅ Changed to PNG since RN doesn't support SVG by default
                 style={styles.image} 
                 resizeMode="contain"
             />
-            <Text style={styles.headerText}>Privacy and Security</Text>
+            <Text style={styles.headerText}>Privacy & Security</Text>
             <Text style={styles.subText}>
-                Protect your account and ensure your data remains secure.
+                Protect your account and ensure your data stays safe with our security features.
             </Text>
+            
             {user && (
                 <Text style={styles.welcomeText}>
-                    Hello, <Text style={styles.userName}>{user.name}</Text>! Review your security settings below.
+                    👋 Hello, <Text style={styles.userName}>{user.username}</Text>!  
+                    Review and update your security settings below.
                 </Text>
             )}
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Update Privacy Settings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.secondaryButton]}>
-                <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-                    Review Security Logs
-                </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.tertiaryButton]}>
-                <Text style={[styles.buttonText, styles.tertiaryButtonText]}>
-                    Enable Two-Factor Authentication
-                </Text>
-            </TouchableOpacity>
-        </View>
+
+            {/* Security Options */}
+            <OptionButton 
+                icon="privacy-tip" 
+                label="Update Privacy Settings" 
+                color="#4CAF50"
+                onPress={() => console.log("Update Privacy Settings")}
+            />
+            <OptionButton 
+                icon="security" 
+                label="Review Security Logs" 
+                color="#2196F3"
+                onPress={() => console.log("Review Security Logs")}
+            />
+            <OptionButton 
+                icon="verified-user" 
+                label="Enable Two-Factor Authentication" 
+                color="#FF9800"
+                onPress={() => console.log("Enable 2FA")}
+            />
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: "center",
+        flexGrow: 1,
+        backgroundColor: "#f0f8f5",
+        padding: 20,
         alignItems: "center",
-        backgroundColor: "#f8f9fa",
-        paddingHorizontal: 20,
     },
     image: {
-        width: 150,
-        height: 150,
-        marginBottom: 20,
+        width: 140,
+        height: 140,
+        marginBottom: 15,
     },
     headerText: {
         fontSize: 26,
         fontWeight: "bold",
-        color: "#2c3e50",
-        marginBottom: 10,
+        color: "#2E7D32",
+        marginBottom: 8,
+        textAlign: "center",
     },
     subText: {
-        fontSize: 16,
-        color: "#7f8c8d",
+        fontSize: 15,
+        color: "#555",
         textAlign: "center",
         marginBottom: 20,
+        lineHeight: 20,
     },
     welcomeText: {
-        fontSize: 18,
-        color: "#34495e",
+        fontSize: 16,
+        color: "#333",
         marginBottom: 20,
         textAlign: "center",
     },
     userName: {
         fontWeight: "bold",
-        color: "#2980b9",
+        color: "#1B5E20",
     },
-    button: {
-        backgroundColor: "#3498db",
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 10,
-        width: "80%",
+    optionButton: {
+        flexDirection: "row",
         alignItems: "center",
+        borderRadius: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        width: "100%",
+        marginVertical: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
-    buttonText: {
+    optionIcon: {
+        marginRight: 12,
+    },
+    optionText: {
         color: "#fff",
         fontSize: 16,
-        fontWeight: "600",
-    },
-    secondaryButton: {
-        backgroundColor: "#ecf0f1",
-    },
-    secondaryButtonText: {
-        color: "#34495e",
-    },
-    tertiaryButton: {
-        backgroundColor: "#2ecc71",
-    },
-    tertiaryButtonText: {
-        color: "#fff",
+        fontWeight: "bold",
     },
 });
 

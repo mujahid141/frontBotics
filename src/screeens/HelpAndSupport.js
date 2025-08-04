@@ -10,55 +10,57 @@ const HelpAndSupport = () => {
     const contactPhone = "+1234567890";
     const faqUrl = "https://www.farmbotic.com/faq";
 
-    const openEmail = () => {
-        Linking.openURL(`mailto:${contactEmail}`);
-    };
+    const openEmail = () => Linking.openURL(`mailto:${contactEmail}`);
+    const callSupport = () => Linking.openURL(`tel:${contactPhone}`);
+    const openFAQ = () => Linking.openURL(faqUrl);
 
-    const callSupport = () => {
-        Linking.openURL(`tel:${contactPhone}`);
-    };
-
-    const openFAQ = () => {
-        Linking.openURL(faqUrl);
-    };
+    const Card = ({ icon, title, description, linkText, onPress }) => (
+        <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={onPress}>
+            <View style={styles.iconContainer}>
+                <Icon name={icon} size={32} color="#4CAF50" />
+            </View>
+            <Text style={styles.cardTitle}>{title}</Text>
+            <Text style={styles.cardDescription}>{description}</Text>
+            {linkText && <Text style={styles.link}>{linkText}</Text>}
+        </TouchableOpacity>
+    );
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            {user && <Text style={styles.welcomeText}>Welcome, {user.username}!</Text>}
+            {user && <Text style={styles.welcomeText}>👋 Welcome, <Text style={styles.username}>{user.username}</Text>!</Text>}
 
             <Text style={styles.headerText}>Help & Support</Text>
 
-            <View style={styles.card}>
-                <Icon name="email" size={30} color="#4CAF50" style={styles.icon} />
-                <Text style={styles.cardTitle}>Contact Us</Text>
-                <Text style={styles.cardDescription}>For support, email us at:</Text>
-                <TouchableOpacity onPress={openEmail}>
-                    <Text style={styles.link}>{contactEmail}</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.card}>
-                <Icon name="phone" size={30} color="#4CAF50" style={styles.icon} />
-                <Text style={styles.cardTitle}>Call Support</Text>
-                <Text style={styles.cardDescription}>Reach out to us at:</Text>
-                <TouchableOpacity onPress={callSupport}>
-                    <Text style={styles.link}>{contactPhone}</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.card}>
-                <Icon name="help" size={30} color="#4CAF50" style={styles.icon} />
-                <Text style={styles.cardTitle}>FAQ</Text>
-                <Text style={styles.cardDescription}>Find answers to common questions:</Text>
-                <TouchableOpacity onPress={openFAQ}>
-                    <Text style={styles.link}>Visit FAQ</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.card}>
-                <Icon name="info" size={30} color="#4CAF50" style={styles.icon} />
+            <Card
+                icon="email"
+                title="Contact Us"
+                description="For support, email us at:"
+                linkText={contactEmail}
+                onPress={openEmail}
+            />
+            <Card
+                icon="phone"
+                title="Call Support"
+                description="Reach out to us at:"
+                linkText={contactPhone}
+                onPress={callSupport}
+            />
+            <Card
+                icon="help"
+                title="FAQ"
+                description="Find answers to common questions:"
+                linkText="Visit FAQ"
+                onPress={openFAQ}
+            />
+            <View style={[styles.card, { paddingVertical: 20 }]}>
+                <View style={styles.iconContainer}>
+                    <Icon name="info" size={32} color="#4CAF50" />
+                </View>
                 <Text style={styles.cardTitle}>About Farmbotic</Text>
-                <Text style={styles.cardDescription}>Farmbotic helps farmers enhance productivity through AI solutions. For more details, visit our website or contact us directly.</Text>
+                <Text style={styles.cardDescription}>
+                    Farmbotic helps farmers enhance productivity through AI-powered solutions. 
+                    For more details, visit our website or contact us directly.
+                </Text>
             </View>
         </ScrollView>
     );
@@ -67,35 +69,42 @@ const HelpAndSupport = () => {
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        backgroundColor: "#F5F5F5",
+        backgroundColor: "#f0f8f5",
         padding: 20,
     },
     welcomeText: {
         fontSize: 18,
-        color: "#555",
-        marginBottom: 10,
+        color: "#2E7D32",
+        marginBottom: 5,
+        fontWeight: "500",
+    },
+    username: {
+        fontWeight: "bold",
+        color: "#1B5E20",
     },
     headerText: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#333",
+        color: "#1B5E20",
         marginBottom: 20,
         textAlign: "center",
     },
     card: {
         backgroundColor: "#FFF",
-        borderRadius: 10,
+        borderRadius: 12,
         padding: 15,
         marginBottom: 15,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 2,
-        flexDirection: "column",
+        elevation: 3,
         alignItems: "center",
     },
-    icon: {
+    iconContainer: {
+        backgroundColor: "#E8F5E9",
+        padding: 10,
+        borderRadius: 50,
         marginBottom: 10,
     },
     cardTitle: {
@@ -108,11 +117,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#666",
         textAlign: "center",
-        marginBottom: 10,
+        marginBottom: 8,
     },
     link: {
         fontSize: 14,
         color: "#4CAF50",
+        fontWeight: "bold",
         textDecorationLine: "underline",
     },
 });

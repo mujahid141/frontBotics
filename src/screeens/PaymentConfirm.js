@@ -7,13 +7,15 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { getBaseUrl } from '../utils/sharesUtils';
 import { AuthContext } from '../context/AuthContext';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
-const PaymentConfirm = ({navigation}) => {
+const PaymentConfirm = ({ navigation }) => {
   const { userToken } = useContext(AuthContext);
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
@@ -33,7 +35,7 @@ const PaymentConfirm = ({navigation}) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${getBaseUrl}payment/payment-post/`,
+        `${getBaseUrl()}payment/payment-post/`,
         {
           transaction_id: transactionId,
           amount: amount,
@@ -50,8 +52,7 @@ const PaymentConfirm = ({navigation}) => {
         Alert.alert('Success', 'Transaction sent for admin approval.');
         setTransactionId('');
         setAmount('');
-        navigation.navigate('Home'); // Navigate to Home after successful submission
-
+        navigation.navigate('Home');
       } else {
         Alert.alert('Error', response.data.message || 'Something went wrong.');
       }
@@ -64,74 +65,122 @@ const PaymentConfirm = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Transaction ID</Text>
-      <TextInput
-        style={styles.input}
-        value={transactionId}
-        onChangeText={setTransactionId}
-        placeholder="Enter transaction ID"
-        autoCapitalize="none"
-      />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.formContainer}>
+        <Icon name="card-outline" size={50} color="#2E7D32" style={{ marginBottom: 15 }} />
+        <Text style={styles.header}>Payment Confirmation</Text>
+        <Text style={styles.subText}>
+          Please enter your payment details to complete the process.
+        </Text>
 
-      <Text style={styles.label}>Amount</Text>
-      <TextInput
-        style={styles.input}
-        value={amount}
-        onChangeText={setAmount}
-        placeholder="Enter amount"
-        keyboardType="numeric"
-      />
+        <Text style={styles.label}>Transaction ID</Text>
+        <TextInput
+          style={styles.input}
+          value={transactionId}
+          onChangeText={setTransactionId}
+          placeholder="Enter transaction ID"
+          autoCapitalize="none"
+          placeholderTextColor="#999"
+        />
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Submit</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          style={styles.input}
+          value={amount}
+          onChangeText={setAmount}
+          placeholder="Enter amount"
+          keyboardType="numeric"
+          placeholderTextColor="#999"
+        />
+
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleSubmit}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Icon name="checkmark-done-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={styles.buttonText}>Submit</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f0f8f5',
     justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 24,
+  },
+  formContainer: {
     backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  subText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
-    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 6,
+    fontWeight: '600',
     color: '#333',
+    alignSelf: 'flex-start',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
+    borderColor: '#ddd',
+    borderRadius: 8,
     padding: 12,
+    fontSize: 15,
     marginBottom: 16,
-    fontSize: 16,
+    width: '100%',
+    backgroundColor: '#fafafa',
+    color: '#000',
   },
   button: {
+    flexDirection: 'row',
     backgroundColor: '#4CAF50',
     paddingVertical: 14,
+    paddingHorizontal: 18,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    width: '100%',
   },
   buttonDisabled: {
     backgroundColor: '#A5D6A7',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

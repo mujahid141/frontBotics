@@ -7,15 +7,15 @@ const Notifications = () => {
     const { user } = useContext(AuthContext);
 
     const notifications = [
-        { id: "1", title: "New Message", description: "You have received a new message from Sarah.", time: "5 mins ago" },
-        { id: "2", title: "Update Available", description: "A new update for your app is available.", time: "2 hours ago" },
-        { id: "3", title: "Welcome Back!", description: "Thank you for logging in, enjoy your experience.", time: "1 day ago" },
+        { id: "1", title: "New Message", description: "You have received a new message from Sarah.", time: "5 mins ago", icon: "message" },
+        { id: "2", title: "Update Available", description: "A new update for your app is available.", time: "2 hours ago", icon: "system-update" },
+        { id: "3", title: "Welcome Back!", description: "Thank you for logging in, enjoy your experience.", time: "1 day ago", icon: "thumb-up" },
     ];
 
     const renderNotification = ({ item }) => (
         <View style={styles.notificationCard}>
             <View style={styles.iconContainer}>
-                <Icon name="notifications" size={24} color="#4CAF50" />
+                <Icon name={item.icon} size={28} color="#4CAF50" />
             </View>
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.title}</Text>
@@ -27,9 +27,9 @@ const Notifications = () => {
 
     return (
         <View style={styles.container}>
-            {user && <Text style={styles.welcomeText}>Welcome, {user.username}!</Text>}
+            {user && <Text style={styles.welcomeText}>👋 Welcome, <Text style={styles.username}>{user.username}</Text>!</Text>}
 
-            <Text style={styles.headerText}>Notifications</Text>
+            <Text style={styles.headerText}>🔔 Notifications</Text>
 
             <FlatList
                 data={notifications}
@@ -45,18 +45,23 @@ const Notifications = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F5F5F5",
+        backgroundColor: "#f0f8f5",
         padding: 20,
     },
     welcomeText: {
         fontSize: 18,
-        color: "#555",
-        marginBottom: 10,
+        color: "#2E7D32",
+        marginBottom: 5,
+        fontWeight: "500",
+    },
+    username: {
+        fontWeight: "bold",
+        color: "#1B5E20",
     },
     headerText: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
-        color: "#333",
+        color: "#1B5E20",
         marginBottom: 20,
     },
     listContainer: {
@@ -64,15 +69,17 @@ const styles = StyleSheet.create({
     },
     notificationCard: {
         flexDirection: "row",
-        backgroundColor: "#FFF",
-        borderRadius: 8,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 12,
         padding: 15,
         marginBottom: 15,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        shadowRadius: 5,
+        elevation: 3,
+        borderLeftWidth: 5,
+        borderLeftColor: "#4CAF50",
     },
     iconContainer: {
         justifyContent: "center",
@@ -86,7 +93,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         color: "#333",
-        marginBottom: 5,
+        marginBottom: 3,
     },
     description: {
         fontSize: 14,
@@ -95,7 +102,8 @@ const styles = StyleSheet.create({
     },
     time: {
         fontSize: 12,
-        color: "#AAA",
+        color: "#999",
+        fontStyle: "italic",
     },
 });
 

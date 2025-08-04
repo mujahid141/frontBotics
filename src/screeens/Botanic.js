@@ -1,7 +1,16 @@
 import React, { useState, useRef, useContext } from 'react';
 import {
-  View, Text, TextInput, Button, StyleSheet,
-  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  TouchableOpacity,
+  ImageBackground
 } from 'react-native';
 import axios from 'axios';
 import { getBaseUrl } from '../utils/sharesUtils';
@@ -9,7 +18,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const Botanic = () => {
   const [messages, setMessages] = useState([
-    { id: 1, text: 'Hello! How can I assist you with your farm today?', sender: 'Botanic' },
+    { id: 1, text: 'Hello! 🌱 How can I assist you with your farm today?', sender: 'Botanic' },
   ]);
   const { userToken } = useContext(AuthContext);
   const [userInput, setUserInput] = useState('');
@@ -46,19 +55,17 @@ const Botanic = () => {
         }
       );
 
-      // Remove "Thinking..." message
       setMessages(prev => prev.filter(msg => !msg.isTemporary));
 
       const botMessage = {
         id: Math.random(),
-        text: response?.data?.answer || "Hmm... I couldn't come up with a response.",
+        text: response?.data?.answer || "🤔 Hmm... I couldn't come up with a response.",
         sender: 'Botanic',
       };
 
       setMessages(prev => [...prev, botMessage]);
 
     } catch (error) {
-      // Remove "Thinking..." message
       setMessages(prev => prev.filter(msg => !msg.isTemporary));
 
       const errorMessage = {
@@ -74,64 +81,107 @@ const Botanic = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
+    <ImageBackground
+      source={require('../../assets/chatbg.jpg')} // 🌿 a soft farm-themed or AI background image
+      style={{ flex: 1 }}
+      imageStyle={{ opacity: 0.20 }} // Low opacity for subtle effect
     >
-      <Text style={styles.header}>Botanic - AI Farm Assistant</Text>
-
-      <ScrollView
-        style={styles.messagesContainer}
-        ref={scrollViewRef}
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({ animated: true })
-        }
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={90}
       >
-        {messages.map(message => (
-          <View
-            key={message.id}
-            style={[
-              styles.message,
-              message.sender === 'You' ? styles.userMessage : styles.botMessage,
-            ]}
-          >
-            <Text style={styles.sender}>{message.sender}</Text>
-            <Text style={styles.text}>{message.text}</Text>
-          </View>
-        ))}
-      </ScrollView>
+        <Text style={styles.header}>Botanic - AI Farm Assistant</Text>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={userInput}
-          onChangeText={setUserInput}
-          placeholder="Ask me something about your farm..."
-          editable={!isThinking}
-        />
-        <Button title="Send" onPress={handleSend} disabled={isThinking} />
-      </View>
+        {/* Messages */}
+        <ScrollView
+          style={styles.messagesContainer}
+          ref={scrollViewRef}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
+          keyboardShouldPersistTaps="handled"
+        >
+          {messages.map(message => (
+            <View
+              key={message.id}
+              style={[
+                styles.message,
+                message.sender === 'You' ? styles.userMessage : styles.botMessage,
+              ]}
+            >
+              <Text style={styles.sender}>{message.sender}</Text>
+              <Text style={styles.text}>{message.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
 
-      {isThinking && (
-        <View style={styles.thinkingContainer}>
-          <ActivityIndicator size="small" color="#4CAF50" />
-          <Text style={styles.thinkingText}>Botanic is thinking...</Text>
+        {/* Input */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={userInput}
+            onChangeText={setUserInput}
+            placeholder="Ask me something about your farm..."
+            placeholderTextColor="#888"
+            editable={!isThinking}
+          />
+          <TouchableOpacity
+  style={[styles.sendButton, isThinking && styles.disabledButton]}
+  onPress={handleSend}
+  disabled={isThinking}
+>
+  <Text style={styles.sendButtonText}>
+    {isThinking ? '...' : 'Send'}
+  </Text>
+</TouchableOpacity>
+
         </View>
-      )}
-    </KeyboardAvoidingView>
+
+        {/* Thinking indicator */}
+        {isThinking && (
+          <View style={styles.thinkingContainer}>
+            <ActivityIndicator size="small" color="#4CAF50" />
+            <Text style={styles.thinkingText}>Botanic is thinking...</Text>
+          </View>
+        )}
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  sendButton: {
+  backgroundColor: '#4CAF50', // Green theme
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 25,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginLeft: 5,
+  elevation: 2, // shadow for Android
+  shadowColor: '#000', // shadow for iOS
+  shadowOpacity: 0.2,
+  shadowRadius: 3,
+  shadowOffset: { width: 0, height: 2 },
+},
+sendButtonText: {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+disabledButton: {
+  backgroundColor: '#ccc',
+},
+
   container: {
     flex: 1,
-    backgroundColor: '#f7f9fc',
-    padding: 20,
+    padding: 10,
   },
   header: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
     textAlign: 'center',
     color: '#2e7d32',
   },
@@ -141,25 +191,31 @@ const styles = StyleSheet.create({
   },
   message: {
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 20,
     marginVertical: 5,
     maxWidth: '80%',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   userMessage: {
-    backgroundColor: '#e0f2f1',
+    backgroundColor: '#c8e6c9',
     alignSelf: 'flex-end',
   },
   botMessage: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: '#fff8e1',
     alignSelf: 'flex-start',
   },
   sender: {
     fontWeight: 'bold',
     marginBottom: 3,
     fontSize: 12,
+    color: '#666',
   },
   text: {
     fontSize: 15,
+    color: '#333',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -168,14 +224,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ddd',
     paddingTop: 10,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
+    marginBottom: 25,
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
     padding: 10,
-    backgroundColor: '#fff',
+    color: '#333',
   },
   thinkingContainer: {
     flexDirection: 'row',

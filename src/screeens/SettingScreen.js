@@ -1,95 +1,145 @@
 import React, { useContext } from "react";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { AuthContext } from "../context/AuthContext";
-import Icon from 'react-native-vector-icons/Ionicons'; // Ensure you have react-native-vector-icons installed
+import Icon from "react-native-vector-icons/Ionicons";
 
-const SettingsScreen = ({navigation}) => {
-    const { user, logout } = useContext(AuthContext); // Access user and logout function
+const SettingsScreen = ({ navigation }) => {
+    const { user, logout } = useContext(AuthContext);
+
+    const MenuButton = ({ icon, label, color, onPress }) => (
+        <TouchableOpacity style={styles.menuButton} onPress={onPress} activeOpacity={0.8}>
+            <View style={[styles.iconCircle, { backgroundColor: color }]}>
+                <Icon name={icon} size={22} color="#fff" />
+            </View>
+            <Text style={styles.menuText}>{label}</Text>
+            <Icon name="chevron-forward" size={20} color="#aaa" />
+        </TouchableOpacity>
+    );
 
     return (
-        <View style={styles.container}>
-            {/* Settings Icon */}
-            <TouchableOpacity style={styles.iconContainer}>
-                <Icon name="settings-outline" size={30} color="#4CAF50" />
-            </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+                <Icon name="settings-outline" size={30} color="#2E7D32" />
+                <Text style={styles.headerTitle}>Settings</Text>
+            </View>
 
-            {/* Welcome Message */}
-            <Text style={styles.title}>Settings</Text>
-            {user && <Text style={styles.welcomeText}>Welcome, {user.username}!</Text>}
+            {/* Welcome */}
+            {user && (
+                <Text style={styles.welcomeText}>
+                    Welcome, <Text style={styles.username}>{user.username}</Text>!
+                </Text>
+            )}
 
-            {/* Buttons */}
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Profile')}>
-                <Text style={styles.buttonText}>Profile Settings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Notification')}>
-                <Text style={styles.buttonText}>Notifications</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('privacyAndSecurity')}>
-                <Text style={styles.buttonText}>Privacy & Security</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HelpAndSupport')}>
-                <Text style={styles.buttonText}>Help & Support</Text>
-            </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('IpInputLoggedIn')}>
-                <Text style={styles.buttonText}>Set Ip</Text>
-            </TouchableOpacity>
+            {/* Menu Options */}
+            <MenuButton
+                icon="person-outline"
+                label="Profile Settings"
+                color="#4CAF50"
+                onPress={() => navigation.navigate("Profile")}
+            />
+            <MenuButton
+                icon="notifications-outline"
+                label="Notifications"
+                color="#2196F3"
+                onPress={() => navigation.navigate("Notification")}
+            />
+            <MenuButton
+                icon="shield-checkmark-outline"
+                label="Privacy & Security"
+                color="#FF9800"
+                onPress={() => navigation.navigate("privacyAndSecurity")}
+            />
+            <MenuButton
+                icon="help-circle-outline"
+                label="Help & Support"
+                color="#9C27B0"
+                onPress={() => navigation.navigate("HelpAndSupport")}
+            />
+            <MenuButton
+                icon="settings-outline"
+                label="Set IP"
+                color="#607D8B"
+                onPress={() => navigation.navigate("IpInputLoggedIn")}
+            />
 
-            {/* Logout Button */}
-            <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                <Text style={styles.logoutButtonText}>Logout</Text>
+            {/* Logout */}
+            <TouchableOpacity style={styles.logoutButton} onPress={logout} activeOpacity={0.9}>
+                <Icon name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
         padding: 20,
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#f0f8f5",
+        flexGrow: 1,
     },
-    iconContainer: {
-        position: "absolute",
-        top: 20,
-        right: 20,
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 10,
     },
-    title: {
+    headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
-        marginVertical: 20,
+        marginLeft: 10,
+        color: "#2E7D32",
     },
     welcomeText: {
-        fontSize: 18,
-        color: "#4CAF50",
-        marginBottom: 30,
-    },
-    button: {
-        width: "80%",
-        padding: 15,
-        backgroundColor: "#4CAF50",
-        borderRadius: 8,
-        alignItems: "center",
-        marginVertical: 8,
-    },
-    buttonText: {
-        color: "#ffffff",
         fontSize: 16,
-        fontWeight: "600",
+        color: "#555",
+        marginBottom: 20,
+    },
+    username: {
+        fontWeight: "bold",
+        color: "#2E7D32",
+    },
+    menuButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 12,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    iconCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 12,
+    },
+    menuText: {
+        flex: 1,
+        fontSize: 16,
+        color: "#333",
+        fontWeight: "500",
     },
     logoutButton: {
-        width: "80%",
-        padding: 15,
+        flexDirection: "row",
         backgroundColor: "#e53935",
-        borderRadius: 8,
-        alignItems: "center",
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 10,
         marginTop: 20,
+        alignItems: "center",
+        justifyContent: "center",
     },
-    logoutButtonText: {
-        color: "#ffffff",
+    logoutText: {
+        color: "#fff",
         fontSize: 16,
-        fontWeight: "600",
+        fontWeight: "bold",
     },
 });
 
